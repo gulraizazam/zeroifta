@@ -123,10 +123,10 @@ io.on('connection', (socket) => {
             const withinRange = isWithinRange(lat, lng, driverStatus[user_id].polylinePoints);
 
             if (!withinRange) {
-                console.log("here");
+                
                 // Driver is off-route
                 if (!driverStatus[user_id].isDeviated) {
-                    console.log("here   qqq");
+                    
                     // Only call API once per deviation
                     driverStatus[user_id].isDeviated = true;
 
@@ -152,7 +152,7 @@ io.on('connection', (socket) => {
                             total_gallons_present: trip.fuel_left,
                             reserve_fuel: trip.reserve_fuel,
                         });
-                        console.log("updateResponse",updateResponse);
+                       
                         console.log("Trip updated successfully:", updateResponse.data);
 
                         // Update stored trip details
