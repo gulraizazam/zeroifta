@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
     
         try {
             let trip;
-            
+    
             // Check if we already have the updated trip details
             if (driverStatus[user_id] && driverStatus[user_id].trip) {
                 trip = driverStatus[user_id].trip;
@@ -92,35 +92,35 @@ io.on('connection', (socket) => {
                     return;
                 }
     
-                // Store the fetched trip in memory for further deviation checks
+                // Store trip details in memory
                 driverStatus[user_id] = { trip };
             }
     
             const { start_lat, start_lng, end_lat, end_lng } = trip;
     
-            // Get polyline route using Google Directions API
-            const polylineResponse = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
-                params: {
-                    origin: `${start_lat},${start_lng}`,
-                    destination: `${end_lat},${end_lng}`,
-                    key: "AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg"
-                }
-            });
+            // Check if polyline is already stored, else fetch from Google
+            if (!driverStatus[user_id].polylinePoints) {
+                console.log(`Fetching route for user ${user_id}`);
     
-            if (polylineResponse.data.routes.length === 0) {
-                console.log("No route found");
-                return;
+                const polylineResponse = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
+                    params: {
+                        origin: `${start_lat},${start_lng}`,
+                        destination: `${end_lat},${end_lng}`,
+                        key: "AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg"
+                    }
+                });
+    
+                if (polylineResponse.data.routes.length === 0) {
+                    console.log("No route found");
+                    return;
+                }
+    
+                const encodedPolyline = polylineResponse.data.routes[0].overview_polyline.points;
+                driverStatus[user_id].polylinePoints = polyline.decode(encodedPolyline);
             }
     
-            // Decode the polyline into an array of coordinates
-            const encodedPolyline = polylineResponse.data.routes[0].overview_polyline.points;
-            const polylinePoints = polyline.decode(encodedPolyline);
-    
-            // Store polyline points in memory for future checks
-            driverStatus[user_id].polylinePoints = polylinePoints;
-    
             // Check if the driver is within 10 miles of any polyline point
-            const withinRange = isWithinRange(lat, lng, polylinePoints);
+            const withinRange = isWithinRange(lat, lng, driverStatus[user_id].polylinePoints);
     
             if (!withinRange) {
                 // Driver is off-route
@@ -129,7 +129,7 @@ io.on('connection', (socket) => {
     
                     console.log(`Driver ${user_id} is off-route. Recalculating route...`);
     
-                    // Emit event to frontend that the driver has deviated
+                    // Emit event to frontend about deviation
                     socket.emit('routeDeviation', {
                         user_id,
                         trip_id,
@@ -152,16 +152,18 @@ io.on('connection', (socket) => {
     
                         console.log("Trip updated successfully:", updateResponse.data);
     
-                        // Update stored trip details with new start location
+                        // Update stored trip details
                         driverStatus[user_id].trip.start_lat = lat;
                         driverStatus[user_id].trip.start_lng = lng;
     
                         // Fetch updated route based on new start location
+                        console.log(`Fetching updated route for user ${user_id}`);
+    
                         const updatedRouteResponse = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
                             params: {
                                 origin: `${lat},${lng}`,
                                 destination: `${end_lat},${end_lng}`,
-                                key: "AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg"
+                                key: "YOUR_GOOGLE_MAPS_API_KEY"
                             }
                         });
     
@@ -176,6 +178,7 @@ io.on('connection', (socket) => {
                             trip_data: updateResponse.data, // Send the full API response
                             message: "Trip updated successfully after deviation."
                         });
+    
                     } catch (updateError) {
                         console.error("Failed to update trip:", updateError.response ? updateError.response.data : updateError.message);
                     }
@@ -183,7 +186,6 @@ io.on('connection', (socket) => {
             } else {
                 // Driver is on-route
                 if (driverStatus[user_id].isDeviated) {
-                    // Reset the flag if the driver returns to the route
                     driverStatus[user_id].isDeviated = false;
                     console.log(`Driver ${user_id} is back on route.`);
                 }
