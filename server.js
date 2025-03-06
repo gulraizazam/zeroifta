@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
                 // Fetch trip details from Laravel API
                 const tripResponse = await axios.post('https://staging.zeroifta.com/api/check-active-trip', { trip_id });
                 trip = tripResponse.data.trip;
-                console.log('trip', trip);
+                console.log('trip', trip.trip);
                 if (!trip) {
                     console.log("Trip not found");
                     return;
