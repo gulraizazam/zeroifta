@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
                 // Fetch trip details from Laravel API
                 const tripResponse = await axios.post('https://staging.zeroifta.com/api/check-active-trip', { trip_id });
                 trip = tripResponse.data.trip;
-                console.log('trip', trip);
+                
                 if (!trip) {
                     console.log("Trip not found");
                     return;
@@ -123,8 +123,10 @@ io.on('connection', (socket) => {
             const withinRange = isWithinRange(lat, lng, driverStatus[user_id].polylinePoints);
 
             if (!withinRange) {
+                console.log("here");
                 // Driver is off-route
                 if (!driverStatus[user_id].isDeviated) {
+                    console.log("here   qqq");
                     // Only call API once per deviation
                     driverStatus[user_id].isDeviated = true;
 
@@ -143,14 +145,14 @@ io.on('connection', (socket) => {
                             trip_id,
                             start_lat: lat,
                             start_lng: lng,
-                            end_lat,
-                            end_lng,
+                            end_lat:trip.end_lat,
+                            end_lng:trip.end_lng,
                             truck_mpg: trip.truck_mpg,
                             fuel_tank_capacity: trip.fuel_tank_capacity,
                             total_gallons_present: trip.fuel_left,
                             reserve_fuel: trip.reserve_fuel,
                         });
-
+                        console.log("updateResponse",updateResponse);
                         console.log("Trip updated successfully:", updateResponse.data);
 
                         // Update stored trip details
