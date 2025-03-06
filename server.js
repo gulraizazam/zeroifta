@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
                 // Fetch trip details from Laravel API
                 const tripResponse = await axios.post('https://staging.zeroifta.com/api/check-active-trip', { trip_id });
                 trip = tripResponse.data.trip;
-                
+                console.log(trip.start_lat);
                 if (!trip) {
                     console.log("Trip not found");
                     return;
@@ -93,7 +93,7 @@ io.on('connection', (socket) => {
                 // Store the fetched trip in memory
                 driverStatus[user_id] = { trip };
             }
-console.log(trip.start_lat);
+
             const { start_lat, start_lng, end_lat, end_lng } = trip;
 
             // Check if we already have polyline points stored
