@@ -152,25 +152,7 @@ io.on('connection', (socket) => {
     
                         console.log("Trip updated successfully:", updateResponse.data);
     
-                        // Update stored trip details
-                        driverStatus[user_id].trip.start_lat = lat;
-                        driverStatus[user_id].trip.start_lng = lng;
-    
-                        // Fetch updated route based on new start location
-                        console.log(`Fetching updated route for user ${user_id}`);
-    
-                        const updatedRouteResponse = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
-                            params: {
-                                origin: `${lat},${lng}`,
-                                destination: `${end_lat},${end_lng}`,
-                                key: "YOUR_GOOGLE_MAPS_API_KEY"
-                            }
-                        });
-    
-                        if (updatedRouteResponse.data.routes.length > 0) {
-                            const updatedPolyline = updatedRouteResponse.data.routes[0].overview_polyline.points;
-                            driverStatus[user_id].polylinePoints = polyline.decode(updatedPolyline);
-                        }
+                        // Emit event to frontend about updated trip
     
                         socket.emit('tripUpdated', {
                             user_id,
