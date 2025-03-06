@@ -93,7 +93,7 @@ io.on('connection', (socket) => {
                 // Store the fetched trip in memory
                 driverStatus[user_id] = { trip };
             }
-
+console.log(trip.start_lat);
             const { start_lat, start_lng, end_lat, end_lng } = trip;
 
             // Check if we already have polyline points stored
