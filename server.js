@@ -35,7 +35,42 @@ function isWithinRange(driverLat, driverLng, polylinePoints) {
     }
     return false; // Driver is too far from all polyline points
 }
+async function sendDeviationNotification(user_id, trip_id) {
+    try {
+        // 1. Get Company ID for the driver
+        const companyResponse = await axios.post('https://staging.zeroifta.com/api/get-company-by-driver', { driver_id: user_id });
+        const company_id = companyResponse.data.company_id;
 
+        if (!company_id) {
+            console.log("Company not found for driver:", user_id);
+            return;
+        }
+
+        // 2. Get FCM tokens for the company
+        const fcmResponse = await axios.post('https://staging.zeroifta.com/api/get-company-fcm-tokens', { company_id });
+        const fcmTokens = fcmResponse.data.tokens;
+
+        if (!fcmTokens || fcmTokens.length === 0) {
+            console.log("No FCM tokens found for company:", company_id);
+            return;
+        }
+
+        // 3. Send Push Notification
+        const message = {
+            notification: {
+                title: "Driver Route Deviation",
+                body: `Driver ${user_id} has deviated from the route on trip ${trip_id}.`
+            },
+            tokens: fcmTokens
+        };
+
+        const response = await admin.messaging().sendMulticast(message);
+        console.log("Push notification sent successfully:", response);
+
+    } catch (error) {
+        console.error("Error sending push notification:", error.response ? error.response.data : error.message);
+    }
+}
 io.on('connection', (socket) => {
     console.log('User connected');
 
@@ -151,7 +186,7 @@ io.on('connection', (socket) => {
                         });
     
                         console.log("Trip updated successfully:", updateResponse.data);
-    
+                       
                         // Emit event to frontend about updated trip
     
                         socket.emit('tripUpdated', {
@@ -160,6 +195,7 @@ io.on('connection', (socket) => {
                             trip_data: updateResponse.data, // Send the full API response
                             message: "Trip updated successfully after deviation."
                         });
+                        await sendDeviationNotification(user_id, trip_id);
     
                     } catch (updateError) {
                         console.error("Failed to update trip:", updateError.response ? updateError.response.data : updateError.message);
