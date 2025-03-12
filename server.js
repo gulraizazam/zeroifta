@@ -105,38 +105,38 @@ io.on('connection', (socket) => {
     // New event to handle trip deviation check
     const driverStatus = {}; // Track driver deviation status & last updated trip route
 
-   
+
 
     socket.on('checkTripDeviation', async (data) => {
         const { trip_id, user_id, lat, lng } = data;
         console.log(`Checking trip deviation for user ${user_id} on trip ${trip_id}`);
-    
+
         try {
             let trip;
-    
-            // Check if we already have the updated trip details
+
+            // Use cached trip details if available
             if (driverStatus[user_id] && driverStatus[user_id].trip) {
                 trip = driverStatus[user_id].trip;
             } else {
                 // Fetch trip details from Laravel API
                 const tripResponse = await axios.post('https://staging.zeroifta.com/api/check-active-trip', { trip_id });
                 trip = tripResponse.data.trip;
-    
+
                 if (!trip) {
                     console.log("Trip not found");
                     return;
                 }
-    
+
                 // Store trip details in memory
                 driverStatus[user_id] = { trip };
             }
-    
+
             const { start_lat, start_lng, end_lat, end_lng } = trip;
-    
-            // Check if polyline is already stored, else fetch from Google
+
+            // Fetch polyline only if it's not already stored
             if (!driverStatus[user_id].polylinePoints) {
                 console.log(`Fetching route for user ${user_id}`);
-    
+
                 const polylineResponse = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
                     params: {
                         origin: `${start_lat},${start_lng}`,
@@ -144,34 +144,35 @@ io.on('connection', (socket) => {
                         key: "AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg"
                     }
                 });
-    
+
                 if (polylineResponse.data.routes.length === 0) {
                     console.log("No route found");
                     return;
                 }
-    
+
+                // Decode and store polyline
                 const encodedPolyline = polylineResponse.data.routes[0].overview_polyline.points;
                 driverStatus[user_id].polylinePoints = polyline.decode(encodedPolyline);
             }
-    
+
             // Check if the driver is within 10 miles of any polyline point
             const withinRange = isWithinRange(lat, lng, driverStatus[user_id].polylinePoints);
-    
+
             if (!withinRange) {
                 // Driver is off-route
                 if (!driverStatus[user_id].isDeviated) {
                     driverStatus[user_id].isDeviated = true;
-    
+
                     console.log(`Driver ${user_id} is off-route. Recalculating route...`);
-    
+
                     // Emit event to frontend about deviation
                     socket.emit('routeDeviation', {
                         user_id,
                         trip_id,
                         message: "Driver has deviated from the route. Recalculating..."
                     });
-    
-                    // Call the update trip API to update the start location
+
+                    // Call update trip API to set new starting point
                     try {
                         const updateResponse = await axios.post('https://staging.zeroifta.com/api/trip/update', {
                             trip_id,
@@ -184,25 +185,27 @@ io.on('connection', (socket) => {
                             total_gallons_present: trip.fuel_left,
                             reserve_fuel: trip.reserve_fuel,
                         });
-    
+
                         console.log("Trip updated successfully:", updateResponse.data);
-                       
-                        // Emit event to frontend about updated trip
-    
+
+                        // Clear old route so the next check fetches a new route
+                        delete driverStatus[user_id].polylinePoints;
+
                         socket.emit('tripUpdated', {
                             user_id,
                             trip_id,
-                            trip_data: updateResponse.data, // Send the full API response
+                            trip_data: updateResponse.data,
                             message: "Trip updated successfully after deviation."
                         });
+
                         await sendDeviationNotification(user_id, trip_id);
-    
+
                     } catch (updateError) {
                         console.error("Failed to update trip:", updateError.response ? updateError.response.data : updateError.message);
                     }
                 }
             } else {
-                // Driver is on-route
+                // Driver is back on-route, reset deviation flag
                 if (driverStatus[user_id].isDeviated) {
                     driverStatus[user_id].isDeviated = false;
                     console.log(`Driver ${user_id} is back on route.`);
@@ -212,7 +215,7 @@ io.on('connection', (socket) => {
             console.error("Error checking trip deviation:", error.response ? error.response.data : error.message);
         }
     });
-    
+
 
     socket.on('disconnect', () => {
         console.log('A user disconnected');
