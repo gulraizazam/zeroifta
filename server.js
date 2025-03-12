@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
 
 
     // Global object to track driver status and API call counts
-const driverStatus = {};
+
 
 socket.on('checkTripDeviation', async (data) => {
     const { trip_id, user_id, lat, lng } = data;
