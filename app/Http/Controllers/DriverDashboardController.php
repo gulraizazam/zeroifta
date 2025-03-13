@@ -145,21 +145,8 @@ class DriverDashboardController extends Controller
             'execution_time' => microtime(true) - $start // Optional: For debugging
         ]);
     }
-    private function batchGetAddressesFromCoordinates($coordinates)
-    {
-        $cacheKey = 'addresses:' . md5(serialize($coordinates)); // Cache key for results
-        $addresses = cache()->remember($cacheKey, 3600, function () use ($coordinates) {
-            $results = [];
-            foreach ($coordinates as $coordinate) {
-                $lat = $coordinate['lat'];
-                $lng = $coordinate['lng'];
-                $results["$lat,$lng"] = $this->getAddressFromCoordinates($lat, $lng);
-            }
-            return $results;
-        });
-
-        return $addresses;
-    }
+   
+   
     private function batchGetAddressesFromCoordinates($coordinates)
     {
         $cacheKey = 'addresses:' . md5(serialize($coordinates)); // Cache key for results
