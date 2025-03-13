@@ -160,35 +160,21 @@ class DriverDashboardController extends Controller
 
         return $addresses;
     }
-    private function batchGetRoutesFromCoordinates($trips)
-{
-    $results = [];
-    foreach ($trips as $trip) {
-        $start = "{$trip->start_lat},{$trip->start_lng}";
-        $end = "{$trip->end_lat},{$trip->end_lng}";
-        $routeKey = "$start-$end";
-
-        $results[$routeKey] = cache()->remember("route:$routeKey", 3600, function () use ($start, $end) {
-            $apiKey = 'AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg';
-            $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$start}&destination={$end}&key={$apiKey}";
-            $response = Http::get($url);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $route = $data['routes'][0]['legs'][0] ?? null;
-
-                return [
-                    'distance' => $route['distance']['text'] ?? null,
-                    'duration' => $route['duration']['text'] ?? null,
-                ];
+    private function batchGetAddressesFromCoordinates($coordinates)
+    {
+        $cacheKey = 'addresses:' . md5(serialize($coordinates)); // Cache key for results
+        $addresses = cache()->remember($cacheKey, 3600, function () use ($coordinates) {
+            $results = [];
+            foreach ($coordinates as $coordinate) {
+                $lat = $coordinate['lat'];
+                $lng = $coordinate['lng'];
+                $results["$lat,$lng"] = $this->getAddressFromCoordinates($lat, $lng);
             }
-
-            return ['distance' => null, 'duration' => null];
+            return $results;
         });
-    }
 
-    return $results;
-}
+        return $addresses;
+    }
     public function contactus(Request $request)
     {
         $validator = Validator::make($request->all(), [
