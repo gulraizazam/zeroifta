@@ -105,7 +105,10 @@ io.on('connection', (socket) => {
     // New event to handle trip deviation check
     const driverStatus = {}; // Track driver deviation status & last updated trip route
 
-   
+
+
+    // Global object to track driver status and API call counts
+
 
     socket.on('checkTripDeviation', async (data) => {
         const { trip_id, user_id, lat, lng } = data;
@@ -200,7 +203,8 @@ io.on('connection', (socket) => {
             console.error("Error checking trip deviation:", error.response ? error.response.data : error.message);
         }
     });
-    
+
+
 
     socket.on('disconnect', () => {
         console.log('A user disconnected');
