@@ -44,7 +44,7 @@ async function sendDeviationNotification(user_id, trip_id) {
         if (!company_id) {
             console.log("Company not found for driver:", user_id);
             return;
-        }
+        }ver
 
         // 2. Get FCM tokens for the company
         const fcmResponse = await axios.post('https://staging.zeroifta.com/api/get-company-fcm-tokens', { company_id });
@@ -131,27 +131,15 @@ io.on('connection', (socket) => {
                 driverStatus[user_id] = { trip };
             }
     
-            const { start_lat, start_lng, end_lat, end_lng } = trip;
+            const { start_lat, start_lng, end_lat, end_lng, polyline_points } = trip;
     
-            // Check if polyline is already stored, else fetch from Google
+            // Check if polyline is already stored, else fetch from database
             if (!driverStatus[user_id].polylinePoints) {
-                console.log(`Fetching route for user ${user_id}`);
+                console.log(`Fetching polyline for user ${user_id} from database`);
     
-                const polylineResponse = await axios.get(`https://maps.googleapis.com/maps/api/directions/json`, {
-                    params: {
-                        origin: `${start_lat},${start_lng}`,
-                        destination: `${end_lat},${end_lng}`,
-                        key: "AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg"
-                    }
-                });
-    
-                if (polylineResponse.data.routes.length === 0) {
-                    console.log("No route found");
-                    return;
-                }
-    
-                const encodedPolyline = polylineResponse.data.routes[0].overview_polyline.points;
-                driverStatus[user_id].polylinePoints = polyline.decode(encodedPolyline);
+                // Decode the stored polyline points
+                const decodedPolyline = polyline.decode(polyline_points);
+                driverStatus[user_id].polylinePoints = decodedPolyline;
             }
     
             // Check if the driver is within 10 miles of any polyline point
@@ -186,15 +174,15 @@ io.on('connection', (socket) => {
                         });
     
                         console.log("Trip updated successfully:", updateResponse.data);
-                       
-                        // Emit event to frontend about updated trip
     
+                        // Emit event to frontend about updated trip
                         socket.emit('tripUpdated', {
                             user_id,
                             trip_id,
                             trip_data: updateResponse.data, // Send the full API response
                             message: "Trip updated successfully after deviation."
                         });
+    
                         await sendDeviationNotification(user_id, trip_id);
     
                     } catch (updateError) {
