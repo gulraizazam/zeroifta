@@ -27,9 +27,10 @@ function getDistance(lat1, lon1, lat2, lon2) {
 
 // Function to check if driver is within 10 miles of any polyline point
 function isWithinRange(driverLat, driverLng, polylinePoints) {
+    const thresholdMiles = 50 / 1609.34;
     for (const [lat, lng] of polylinePoints) {
         const distance = getDistance(driverLat, driverLng, lat, lng);
-        if (distance <= 10) {
+        if (distance <= thresholdMiles) {
             return true; // Driver is within range of at least one point
         }
     }
