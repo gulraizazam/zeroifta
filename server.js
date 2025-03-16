@@ -27,10 +27,10 @@ function getDistance(lat1, lon1, lat2, lon2) {
 
 // Function to check if driver is within 10 miles of any polyline point
 function isWithinRange(driverLat, driverLng, polylinePoints) {
-    const thresholdMiles = 50 / 1609.34;
+    const thresholdMeters  = 50 / 1609.34;
     for (const [lat, lng] of polylinePoints) {
         const distance = getDistance(driverLat, driverLng, lat, lng);
-        if (distance <= thresholdMiles) {
+        if (distance <= thresholdMeters ) {
             return true; // Driver is within range of at least one point
         }
     }
@@ -45,7 +45,7 @@ async function sendDeviationNotification(user_id, trip_id) {
         if (!company_id) {
             console.log("Company not found for driver:", user_id);
             return;
-        }ver
+        }
 
         // 2. Get FCM tokens for the company
         const fcmResponse = await axios.post('https://staging.zeroifta.com/api/get-company-fcm-tokens', { company_id });
