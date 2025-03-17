@@ -161,6 +161,7 @@ io.on('connection', (socket) => {
                         trip_id,
                         message: "Driver has deviated from the route. Recalculating..."
                     });
+                    console.log("bearing is ", bearing);
 
                     // Call the update trip API to update the start location
                     try {
