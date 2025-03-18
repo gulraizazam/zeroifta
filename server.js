@@ -165,7 +165,7 @@ io.on('connection', (socket) => {
 
                     // Call the update trip API to update the start location
                     try {
-                        const updateResponse = await axios.post('https://staging.zeroifta.com/api/trip/update', {
+                        const updateResponse = await axios.post('https://staging.zeroifta.com/api/trip/deviate', {
                             trip_id,
                             start_lat: lat,
                             start_lng: lng,
