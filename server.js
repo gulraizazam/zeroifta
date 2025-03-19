@@ -112,7 +112,7 @@ io.on('connection', (socket) => {
 
 
     socket.on('checkTripDeviation', async (data) => {
-        const { trip_id, user_id, lat, lng,bearing } = data;
+        const { trip_id, user_id, lat, lng, bearing } = data;
         console.log(`Checking trip deviation for user ${user_id} on trip ${trip_id}`);
 
         try {
@@ -179,6 +179,10 @@ io.on('connection', (socket) => {
                         });
 
                         console.log("Trip updated successfully:", updateResponse.data);
+
+                        // Update the driverStatus object with the new trip data and polyline points
+                        driverStatus[user_id].trip = updateResponse.data.trip;
+                        driverStatus[user_id].polylinePoints = updateResponse.data.polyline; // Ensure this matches the API response
 
                         // Emit event to frontend about updated trip
                         socket.emit('tripUpdated', {
