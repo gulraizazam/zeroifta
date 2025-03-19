@@ -182,7 +182,7 @@ io.on('connection', (socket) => {
 
                         // Update the driverStatus object with the new trip data and polyline points
                         driverStatus[user_id].trip = updateResponse.data.trip;
-                        driverStatus[user_id].polylinePoints = updateResponse.data.polyline; // Ensure this matches the API response
+                        driverStatus[user_id].polylinePoints = updateResponse.data.polyline_paths; // Ensure this matches the API response
 
                         // Emit event to frontend about updated trip
                         socket.emit('tripUpdated', {
