@@ -103,13 +103,8 @@ io.on('connection', (socket) => {
         });
     });
 
-    // New event to handle trip deviation check
-    const driverStatus = {}; // Track driver deviation status & last updated trip route
 
-
-
-    // Global object to track driver status and API call counts
-
+    const driverStatus = {};
 
     socket.on('checkTripDeviation', async (data) => {
         const { trip_id, user_id, lat, lng, bearing } = data;
@@ -132,7 +127,7 @@ io.on('connection', (socket) => {
                 }
 
                 // Store trip details in memory
-                driverStatus[user_id] = { trip };
+                driverStatus[user_id] = { trip, deviationCount: 0 };
             }
 
             const { start_lat, start_lng, end_lat, end_lng, polyline_points } = trip;
@@ -183,6 +178,9 @@ io.on('connection', (socket) => {
                         // Update the driverStatus object with the new trip data and polyline points
                         driverStatus[user_id].trip = updateResponse.data.trip;
                         driverStatus[user_id].polylinePoints = updateResponse.data.polyline_paths;
+                        driverStatus[user_id].deviationCount = (driverStatus[user_id].deviationCount || 0) + 1;
+
+                        console.log(`Deviation count for user ${user_id}:`, driverStatus[user_id].deviationCount);
 
                         // Emit event to frontend about updated trip
                         socket.emit('tripUpdated', {
