@@ -117,6 +117,7 @@ io.on('connection', (socket) => {
             if (driverStatus[user_id] && driverStatus[user_id].trip) {
                 trip = driverStatus[user_id].trip;
             } else {
+                console.log(`Fetching trip details for trip ${trip_id} from Laravel API`);
                 // Fetch trip details from Laravel API
                 const tripResponse = await axios.post('https://staging.zeroifta.com/api/check-active-trip', { trip_id });
                 trip = tripResponse.data.trip;
