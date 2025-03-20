@@ -157,7 +157,9 @@ io.on('connection', (socket) => {
                         message: "Driver has deviated from the route. Recalculating..."
                     });
                     console.log("bearing is ", bearing);
+                    driverStatus[user_id].deviationCount = (driverStatus[user_id].deviationCount || 0) + 1;
 
+                    console.log(`Deviation count for user ${user_id}:`, driverStatus[user_id].deviationCount);
                     // Call the update trip API to update the start location
                     try {
                         const updateResponse = await axios.post('https://staging.zeroifta.com/api/trip/deviate', {
@@ -178,9 +180,7 @@ io.on('connection', (socket) => {
                         // Update the driverStatus object with the new trip data and polyline points
                         driverStatus[user_id].trip = updateResponse.data.trip;
                         driverStatus[user_id].polylinePoints = updateResponse.data.polyline_paths;
-                        driverStatus[user_id].deviationCount = (driverStatus[user_id].deviationCount || 0) + 1;
 
-                        console.log(`Deviation count for user ${user_id}:`, driverStatus[user_id].deviationCount);
 
                         // Emit event to frontend about updated trip
                         socket.emit('tripUpdated', {
