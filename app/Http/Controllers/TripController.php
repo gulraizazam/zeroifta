@@ -136,6 +136,7 @@ class TripController extends Controller
             //$route = $data['routes'][0];
             $currentLocation = $startLat.','.$startLng;
             $bestRoute = $this->getBestForwardRoute($routes, $currentLocation,$userBearing);
+            dd($bestRoute);
             $legs = $bestRoute['legs'];
             $decodedCoordinates = [];
             $stepSize = 7; // Sample every 3rd point
