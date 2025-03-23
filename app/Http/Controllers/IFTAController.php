@@ -329,11 +329,11 @@ class IFTAController extends Controller
             //'reserve_fuel'=>'required'
         ]);
         // Check if an active trip already exists for the user
-        // $findTrip = Trip::where('user_id', $validatedData['user_id'])->where('status', 'active')->first();
+        $findTrip = Trip::where('user_id', $validatedData['user_id'])->where('status', 'active')->first();
 
-        // if ($findTrip) {
-        //     return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => $findTrip]);
-        // }
+        if ($findTrip) {
+            return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => $findTrip]);
+        }
          // Set trip status to active
         $validatedData['status']='active';
          // Fetch the vehicle associated with the driver
@@ -374,7 +374,7 @@ class IFTAController extends Controller
                         }
                     }
                 }
-                dd($decodedCoordinates);
+                
                 // Extract polyline points as an array of strings
                 $polylinePoints = array_map(function ($step) {
                     return $step['polyline']['points'] ?? null;

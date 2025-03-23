@@ -158,7 +158,7 @@ class TripController extends Controller
                     }
                 }
             }
-            dd($decodedCoordinates);
+            
             foreach ($legs as $leg) {
                 if (isset($leg['distance']['value'])) {
                     $totalDistance += $leg['distance']['value'];
@@ -1490,7 +1490,7 @@ class TripController extends Controller
         $start = $tripDetailResponse['data']['trip']['start'] ?? null;
         $fuelStations = collect($tripDetailResponse['data']['fuelStations']);
         $optimalStation = $fuelStations->firstWhere('isOptimal', true);
-
+        dd($optimalStation);
         // Calculate truck's travelable distance
         $truckTravelableDistanceInMiles = 0;
         if (!empty($tripDetailResponse['data']['vehicle']['mpg'])) {
