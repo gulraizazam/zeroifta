@@ -1496,7 +1496,10 @@ class TripController extends Controller
     private function haversineDistance($lat1, $lng1, $lat2, $lng2)
     {
         $earthRadius = 6371000; // Earth's radius in meters
-
+        $lat1 = (float) $lat1;
+        $lng1 = (float) $lng1;
+        $lat2 = (float) $lat2;
+        $lng2 = (float) $lng2;
         $latDelta = deg2rad($lat2 - $lat1);
         $lngDelta = deg2rad($lng2 - $lng1);
 
