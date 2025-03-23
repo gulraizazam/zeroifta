@@ -214,7 +214,16 @@ class TripController extends Controller
             // ];
             $trip = Trip::find($request->trip_id);
            // $result = $this->markOptimumFuelStations($tripDetailResponse);
-           $result = FuelStation::where('trip_id', $trip->id)->get();
+           //$result = FuelStation::where('trip_id', $trip->id)->get();
+           $result = FuelStation::where('trip_id', $trip->id)->get()->map(function ($station) {
+            return [
+                'fuel_station_name'=>$station->name,
+                'ftpLat' => $station->latitude,
+                'ftpLng' => $station->longitude,
+                'IFTA_tax' => $station->ifta_tax,
+                'isOptimal' => $station->is_optimal
+            ];
+        })
                 // if($result==false){
                 //     $result = $matchingRecords;
 
