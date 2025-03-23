@@ -1510,7 +1510,7 @@ class TripController extends Controller
         $endLng = $tripDetailResponse['data']['trip']['end']['longitude'] ?? null;
         $start = $tripDetailResponse['data']['trip']['start'] ?? null;
         $fuelStations = collect($tripDetailResponse['data']['fuelStations']);
-        dd($fuelStations);
+        
         $optimalStation = $fuelStations->firstWhere('isOptimal', true);
         
         // Calculate truck's travelable distance
