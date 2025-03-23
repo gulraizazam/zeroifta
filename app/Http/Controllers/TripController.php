@@ -1295,7 +1295,7 @@ class TripController extends Controller
 
                     // Reset array keys to ensure a clean array structure
                     $finalFilteredPolyline = array_values($finalFilteredPolyline);
-                    $ftpData = $this->loadAndParseFTPData();
+                    $ftpData = $this->loadAndParseFTPData($finalFilteredPolyline);
                     $matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
