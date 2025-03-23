@@ -191,29 +191,30 @@ class TripController extends Controller
 
             $reserve_fuel = $request->reserve_fuel;
             $totalFuel = $currentFuel + $reserve_fuel;
-            // $tripDetailResponse = [
-            //     'data' => [
-            //         'trip' => [
-            //             'start' => [
-            //                 'latitude' => $startLat,
-            //                 'longitude' => $startLng
-            //             ],
-            //             'end' => [
-            //                 'latitude' => $endLat,
-            //                 'longitude' => $endLng
-            //             ]
-            //         ],
-            //         'vehicle' => [
-            //             'mpg' => $truckMpg,
-            //             'fuelLeft' => $totalFuel
-            //         ],
-            //         'fuelStations' => $matchingRecords,
-            //         'polyline'=>$decodedCoordinates
+            $tripDetailResponse = [
+                'data' => [
+                    'trip' => [
+                        'start' => [
+                            'latitude' => $startLat,
+                            'longitude' => $startLng
+                        ],
+                        'end' => [
+                            'latitude' => $endLat,
+                            'longitude' => $endLng
+                        ]
+                    ],
+                    'vehicle' => [
+                        'mpg' => $truckMpg,
+                        'fuelLeft' => $totalFuel
+                    ],
+                    'fuelStations' => $matchingRecords,
+                    'polyline'=>$decodedCoordinates
 
-            //     ]
-            // ];
+                ]
+            ];
             $trip = Trip::find($request->trip_id);
-           // $result = $this->markOptimumFuelStations($tripDetailResponse);
+            $result = $this->markOptimumFuelStations($tripDetailResponse);
+            dd($result);    
            //$result = FuelStation::where('trip_id', $trip->id)->get();
            $result = FuelStation::where('trip_id', $trip->id)->get()->map(function ($station) {
             return [
