@@ -237,7 +237,7 @@ class TripController extends Controller
                     ]
                 );
             }
-        dd($result);
+        
                 // if($result==false){
                 //     $result = $matchingRecords;
 
