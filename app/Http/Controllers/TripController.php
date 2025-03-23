@@ -136,7 +136,7 @@ class TripController extends Controller
             //$route = $data['routes'][0];
             $currentLocation = $startLat.','.$startLng;
             $bestRoute = $this->getBestForwardRoute($routes, $currentLocation,$userBearing);
-            dd($bestRoute);
+           
             $legs = $bestRoute['legs'];
             $decodedCoordinates = [];
             $stepSize = 7; // Sample every 3rd point
@@ -158,6 +158,7 @@ class TripController extends Controller
                     }
                 }
             }
+            dd($decodedCoordinates);
             foreach ($legs as $leg) {
                 if (isset($leg['distance']['value'])) {
                     $totalDistance += $leg['distance']['value'];
