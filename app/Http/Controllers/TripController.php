@@ -208,7 +208,7 @@ class TripController extends Controller
                         'fuelLeft' => $totalFuel
                     ],
                     'fuelStations' => $matchingRecords,
-                    'polyline'=>$decodedCoordinates
+                    'polyline'=>$decodedPolyline
 
                 ]
             ];
