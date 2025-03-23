@@ -190,7 +190,7 @@ class TripController extends Controller
             });
             $finalFilteredPolyline = array_values($finalFilteredPolyline);
             $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
-
+            dd($matchingRecords);
             $reserve_fuel = $request->reserve_fuel;
             $totalFuel = $currentFuel + $reserve_fuel;
             $tripDetailResponse = [
