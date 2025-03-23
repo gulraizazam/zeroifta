@@ -218,8 +218,8 @@ class TripController extends Controller
            $result = FuelStation::where('trip_id', $trip->id)->get()->map(function ($station) {
             return [
                 'fuel_station_name'=>$station->name,
-                'ftpLat' => $station->latitude,
-                'ftpLng' => $station->longitude,
+                'ftpLat' => (string)$station->latitude,
+                'ftpLng' => (string)$station->longitude,
                 'IFTA_tax' => $station->ifta_tax,
                 'isOptimal' => $station->is_optimal
             ];
