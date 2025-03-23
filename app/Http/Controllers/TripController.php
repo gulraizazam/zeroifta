@@ -216,17 +216,27 @@ class TripController extends Controller
             ];
             $trip = Trip::find($request->trip_id);
             $result = $this->markOptimumFuelStations($tripDetailResponse);
-            dd($result);    
-           //$result = FuelStation::where('trip_id', $trip->id)->get();
-           $result = FuelStation::where('trip_id', $trip->id)->get()->map(function ($station) {
-            return [
-                'fuel_station_name'=>$station->name,
-                'ftpLat' => (string)$station->latitude,
-                'ftpLng' => (string)$station->longitude,
-                'IFTA_tax' => $station->ifta_tax,
-                'isOptimal' => $station->is_optimal
-            ];
-        });
+            foreach ($result as $value) {
+                FuelStation::updateOrCreate(
+                    [
+                        'trip_id' => $trip->id, // Condition to check if the record exists
+                        'latitude' => $value['ftpLat'],
+                        'longitude' => $value['ftpLng']
+                    ],
+                    [
+                        'name' => $value['fuel_station_name'],
+                        'price' => $value['price'],
+                        'lastprice' => $value['lastprice'],
+                        'discount' => $value['discount'],
+                        'ifta_tax' => $value['IFTA_tax'],
+                        'is_optimal' => $value['isOptimal'] ?? false,
+                        'address' => $value['address'],
+                        'gallons_to_buy' => $value['gallons_to_buy'],
+                        'trip_id' => $trip->id,
+                        'user_id' => $trip->user_id,
+                    ]
+                );
+            }
         dd($result);
                 // if($result==false){
                 //     $result = $matchingRecords;
