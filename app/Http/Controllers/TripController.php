@@ -223,7 +223,8 @@ class TripController extends Controller
                 'IFTA_tax' => $station->ifta_tax,
                 'isOptimal' => $station->is_optimal
             ];
-        })
+        });
+        dd($result);
                 // if($result==false){
                 //     $result = $matchingRecords;
 
