@@ -103,16 +103,11 @@ io.on('connection', (socket) => {
         });
     });
 
-    // New event to handle trip deviation check
-    const driverStatus = {}; // Track driver deviation status & last updated trip route
 
-
-
-    // Global object to track driver status and API call counts
-
+    const driverStatus = {};
 
     socket.on('checkTripDeviation', async (data) => {
-        const { trip_id, user_id, lat, lng,bearing } = data;
+        const { trip_id, user_id, lat, lng, bearing } = data;
         console.log(`Checking trip deviation for user ${user_id} on trip ${trip_id}`);
 
         try {
@@ -122,6 +117,7 @@ io.on('connection', (socket) => {
             if (driverStatus[user_id] && driverStatus[user_id].trip) {
                 trip = driverStatus[user_id].trip;
             } else {
+                console.log(`Fetching trip details for trip ${trip_id} from Laravel API`);
                 // Fetch trip details from Laravel API
                 const tripResponse = await axios.post('https://staging.zeroifta.com/api/check-active-trip', { trip_id });
                 trip = tripResponse.data.trip;
@@ -132,7 +128,7 @@ io.on('connection', (socket) => {
                 }
 
                 // Store trip details in memory
-                driverStatus[user_id] = { trip };
+                driverStatus[user_id] = { trip, deviationCount: 0 };
             }
 
             const { start_lat, start_lng, end_lat, end_lng, polyline_points } = trip;
@@ -150,8 +146,8 @@ io.on('connection', (socket) => {
 
             if (!withinRange) {
                 // Driver is off-route
-                if (!driverStatus[user_id].isDeviated) {
-                    driverStatus[user_id].isDeviated = true;
+                //if (!driverStatus[user_id].isDeviated) {
+                    //driverStatus[user_id].isDeviated = true;
 
                     console.log(`Driver ${user_id} is off-route. Recalculating route...`);
 
@@ -162,7 +158,9 @@ io.on('connection', (socket) => {
                         message: "Driver has deviated from the route. Recalculating..."
                     });
                     console.log("bearing is ", bearing);
+                    driverStatus[user_id].deviationCount = (driverStatus[user_id].deviationCount || 0) + 1;
 
+                    console.log(`Deviation count for user ${user_id}:`, driverStatus[user_id].deviationCount);
                     // Call the update trip API to update the start location
                     try {
                         const updateResponse = await axios.post('https://staging.zeroifta.com/api/trip/deviate', {
@@ -180,6 +178,11 @@ io.on('connection', (socket) => {
 
                         console.log("Trip updated successfully:", updateResponse.data);
 
+                        // Update the driverStatus object with the new trip data and polyline points
+                        driverStatus[user_id].trip = updateResponse.data.trip;
+                        driverStatus[user_id].polylinePoints = updateResponse.data.polyline_paths;
+
+
                         // Emit event to frontend about updated trip
                         socket.emit('tripUpdated', {
                             user_id,
@@ -193,13 +196,13 @@ io.on('connection', (socket) => {
                     } catch (updateError) {
                         console.error("Failed to update trip:", updateError.response ? updateError.response.data : updateError.message);
                     }
-                }
+                //}
             } else {
                 // Driver is on-route
-                if (driverStatus[user_id].isDeviated) {
-                    driverStatus[user_id].isDeviated = false;
-                    console.log(`Driver ${user_id} is back on route.`);
-                }
+                // if (driverStatus[user_id].isDeviated) {
+                //     driverStatus[user_id].isDeviated = false;
+                //     console.log(`Driver ${user_id} is back on route.`);
+                // }
             }
         } catch (error) {
             console.error("Error checking trip deviation:", error.response ? error.response.data : error.message);
