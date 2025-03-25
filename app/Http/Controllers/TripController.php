@@ -921,7 +921,7 @@ class TripController extends Controller
                 $finalFilteredPolyline = array_values($finalFilteredPolyline);
                     $ftpData = $this->loadAndParseFTPData($finalFilteredPolyline);
                     $matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
-                    dd($matchingRecords);
+                    dd($ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
                     if($vehicle_id){
