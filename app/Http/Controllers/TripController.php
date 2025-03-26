@@ -136,7 +136,7 @@ class TripController extends Controller
             //$route = $data['routes'][0];
             $currentLocation = $startLat.','.$startLng;
             $bestRoute = $this->getBestForwardRoute($routes, $currentLocation,$userBearing);
-           
+
             $legs = $bestRoute['legs'];
             $decodedCoordinates = [];
             $stepSize = 7; // Sample every 3rd point
@@ -158,7 +158,7 @@ class TripController extends Controller
                     }
                 }
             }
-            
+
             foreach ($legs as $leg) {
                 if (isset($leg['distance']['value'])) {
                     $totalDistance += $leg['distance']['value'];
@@ -190,7 +190,7 @@ class TripController extends Controller
             });
             $finalFilteredPolyline = array_values($finalFilteredPolyline);
             $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
-            
+
             $reserve_fuel = $request->reserve_fuel;
             $totalFuel = $currentFuel + $reserve_fuel;
             $tripDetailResponse = [
@@ -237,7 +237,7 @@ class TripController extends Controller
                     ]
                 );
             }
-        
+
                 // if($result==false){
                 //     $result = $matchingRecords;
 
@@ -921,7 +921,7 @@ class TripController extends Controller
                 $finalFilteredPolyline = array_values($finalFilteredPolyline);
                     $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
                     //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
-                   
+
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
                     if($vehicle_id){
@@ -1295,8 +1295,8 @@ class TripController extends Controller
 
                     // Reset array keys to ensure a clean array structure
                     $finalFilteredPolyline = array_values($finalFilteredPolyline);
-                    $ftpData = $this->loadAndParseFTPData($finalFilteredPolyline);
-                    $matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
+                    $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
+                    //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
 
@@ -1524,9 +1524,9 @@ class TripController extends Controller
         $endLng = $tripDetailResponse['data']['trip']['end']['longitude'] ?? null;
         $start = $tripDetailResponse['data']['trip']['start'] ?? null;
         $fuelStations = collect($tripDetailResponse['data']['fuelStations']);
-        
+
         $optimalStation = $fuelStations->firstWhere('isOptimal', true);
-        
+
         // Calculate truck's travelable distance
         $truckTravelableDistanceInMiles = 0;
         if (!empty($tripDetailResponse['data']['vehicle']['mpg'])) {
