@@ -35,7 +35,7 @@ class VehiclesController extends Controller
     {
 
         $data = $request->validate([
-            'vehicle_id'=>'required|unique:vehicles,vehicle_id',
+            'vehicle_id'=>'required',
            'vin' => [
                 'required',
                 Rule::unique('vehicles')->where(function ($query) use ($request) {
@@ -55,13 +55,19 @@ class VehiclesController extends Controller
             'image' => 'required|mimes:jpeg,png,jpg,gif|max:1024',
 
         ]);
+        $checkExistingVehicle = Vehicle::where('vehicle_id', $request->vehicle_id)->first();
+        //dd($checkExistingVehicle);
+        if ($checkExistingVehicle && $checkExistingVehicle->vin !== $request->vin) {
+            return redirect()->back()->withError('This vehicle ID is already associated with a different VIN.');
+        }
         $existingVehicle = Vehicle::where('vin', $request->vin)
             ->where('owner_type', 'company')
             ->where('owner_id',Auth::id())
             ->first();
 
         if ($existingVehicle) {
-            return response()->json(['status' => 400, 'message' => 'This vehicle already belongs to the company.']);
+            return redirect()->back()->withError('This vehicle already belongs to the company.');
+
         }
         $apiUrl = "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVINValues/{$request->vin}?format=json";
         $response = Http::get($apiUrl);
@@ -213,7 +219,7 @@ class VehiclesController extends Controller
         }else{
             return redirect('vehicles/all')->withError('No vehicle found');
         }
-       
+
     }
     public function importForm()
     {

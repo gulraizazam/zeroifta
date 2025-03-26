@@ -31,9 +31,9 @@
   @if(Session::has('success'))
   <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: #13975b;color:white">
     {{Session::get('success')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
+      <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button> -->
   </div>
   @endif
   <div class="profile-area mb-4">
@@ -48,12 +48,12 @@
               </div>
 
               @else
-              <!-- <img src="{{asset('assets/user.png')}}" alt="profile_image" class="w-100 border-radius-lg shadow-sm" style="height: 100px;"> -->
-              <span class="profile-ph">
+              <img src="{{asset('assets/user_placeholder.svg')}}" alt="profile_image" class="w-100 border-radius-lg shadow-sm rounded-image" style="height: 100px;">
+              <!-- <span class="profile-ph">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
                   <path d="M154.167 168.725V133.333C154.167 133.333 133.333 120.833 100 120.833C66.6667 120.833 45.8333 133.333 45.8333 133.333V168.725M12.5 100C12.5 51.675 51.675 12.5 100 12.5C148.325 12.5 187.5 51.675 187.5 100C187.5 148.325 148.325 187.5 100 187.5C51.675 187.5 12.5 148.325 12.5 100ZM99.3833 104.167C99.3833 104.167 70.8333 89 70.8333 66.6667C70.8333 50.5583 83.9083 37.5 100.033 37.5C103.862 37.4989 107.654 38.2528 111.191 39.7186C114.728 41.1844 117.942 43.3333 120.648 46.0423C123.354 48.7513 125.499 51.9673 126.961 55.5063C128.423 59.0452 129.172 62.8377 129.167 66.6667C129.167 89 100.617 104.167 100.617 104.167H99.3833Z" stroke="white" stroke-width="3" />
                 </svg>
-              </span>
+              </span> -->
 
               @endif
               <div class="up-info">
@@ -111,7 +111,7 @@
 
                         <input
                             type="file"
-                            class="form-control dis-input"
+                            class="form-control dis-input choose-file-input"
 
                             name="image"
                             accept="image/png, image/jpg, image/jpeg"

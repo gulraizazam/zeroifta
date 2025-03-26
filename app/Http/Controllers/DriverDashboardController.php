@@ -6,12 +6,18 @@ use App\Models\CompanyContactUs;
 use App\Models\CompanyDriver;
 use App\Models\Contactus;
 use App\Models\DriverVehicle;
+use App\Models\FcmToken;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
 use App\Models\Plan;
 use App\Models\Trip;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Stripe\Customer;
@@ -20,6 +26,12 @@ use Stripe\Subscription;
 
 class DriverDashboardController extends Controller
 {
+    protected $fcmService;
+
+    public function __construct(FcmService $fcmService)
+    {
+        $this->fcmService = $fcmService;
+    }
     public function index(Request $request)
     {
         Stripe::setApiKey('sk_test_51FYXgWJOfbRIs4ne6dmGfFbmR1pKgX5V1CQVQHSSlzjCom2KemJylbslX2ylQ2dpbrvmSBGUQSWt6kXETr1ByRR500fTaO7v7k');
@@ -53,31 +65,31 @@ class DriverDashboardController extends Controller
             }else{
                 $vehicle->vehicle_image =null;
             }
-           
+
         }
             $dashboardData['vehicle'] = $vehicle;
-        
-        
+
+
 
         // Fetch the last 5 trips
-        $trips = Trip::select('id', 'user_id', 'start_lat', 'start_lng', 'end_lat', 'end_lng', 'status', 'created_at')
+        $trips = Trip::select('id', 'user_id', 'start_lat', 'start_lng', 'end_lat', 'end_lng', 'status', 'created_at','start_address','end_address','distance','duration','start_city','start_state','end_city','end_state')
             ->where('user_id', $request->driver_id)
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
         // Cache addresses and routes
-        $addresses = $this->batchGetAddressesFromCoordinates($trips->flatMap(function ($trip) {
-            return [
-                ['lat' => $trip->start_lat, 'lng' => $trip->start_lng],
-                ['lat' => $trip->end_lat, 'lng' => $trip->end_lng],
-            ];
-        })->unique());
+        // $addresses = $this->batchGetAddressesFromCoordinates($trips->flatMap(function ($trip) {
+        //     return [
+        //         ['lat' => $trip->start_lat, 'lng' => $trip->start_lng],
+        //         ['lat' => $trip->end_lat, 'lng' => $trip->end_lng],
+        //     ];
+        // })->unique());
 
-        $routes = $this->batchGetRoutesFromCoordinates($trips);
+        // $routes = $this->batchGetRoutesFromCoordinates($trips);
 
         // Map trips with pre-fetched data
-        $tripData = $trips->map(function ($trip) use ($addresses, $routes) {
+        $tripData = $trips->map(function ($trip){
             $pickupKey = "{$trip->start_lat},{$trip->start_lng}";
             $dropoffKey = "{$trip->end_lat},{$trip->end_lng}";
             $routeKey = "$pickupKey-$dropoffKey";
@@ -89,10 +101,15 @@ class DriverDashboardController extends Controller
                 'end_lat'=>$trip->end_lat,
                 'end_lng'=>$trip->end_lng,
                 'user_id' => $trip->user_id,
-                'pickup' => $addresses[$pickupKey] ?? 'Unknown Location',
-                'dropoff' => $addresses[$dropoffKey] ?? 'Unknown Location',
-                'distance' => $routes[$routeKey]['distance'] ?? null,
-                'duration' => $routes[$routeKey]['duration'] ?? null,
+                'pickup' => $trip->start_address ?? 'Unknown Location',
+                'dropoff' => $trip->end_address ?? 'Unknown Location',
+                'start_city'=>$trip->start_city ?? null,
+                'start_state'=>$trip->start_state ?? null,
+                'end_city'=>$trip->start_city ?? null,
+                'end_state'=>$trip->start_state ?? null,
+
+                'distance' =>$trip->distance ?? null,
+                'duration' => $trip->duration ?? null,
                 'status' => $trip->status,
                 'created_at' => $trip->created_at->format('d M'),
             ];
@@ -106,18 +123,18 @@ class DriverDashboardController extends Controller
                 'limit' => 1,
             ]);
         }
-        
+
 
             // Check if customer has active subscriptions
-           
 
-            
+
+
 
            if(!empty($subscriptions->data)){
             $findPlan = Plan::where('stripe_plan_id',$subscriptions->data[0]->items->data[0]->plan->id)->first();
-                
+
             $subscription = $subscriptions->data[0];
-              
+
             // Extract next billing details
             $nextBillingDate = $subscription->current_period_end;
             $planName = $findPlan->name;
@@ -132,7 +149,7 @@ class DriverDashboardController extends Controller
            }else{
             $subscriptionDetail = null;
            }
-           
+
 
              $dashboardData['subscription'] = $subscriptionDetail;
              $dashboardData['recentTrips'] = $tripData;
@@ -145,8 +162,8 @@ class DriverDashboardController extends Controller
             'execution_time' => microtime(true) - $start // Optional: For debugging
         ]);
     }
-   
-   
+
+
     private function batchGetAddressesFromCoordinates($coordinates)
     {
         $cacheKey = 'addresses:' . md5(serialize($coordinates)); // Cache key for results
@@ -161,6 +178,32 @@ class DriverDashboardController extends Controller
         });
 
         return $addresses;
+    }
+    private function batchGetRoutesFromCoordinates($trips)
+    {
+        $results = [];
+
+        foreach ($trips as $trip) {
+            $start = "{$trip->start_lat},{$trip->start_lng}";
+            $end = "{$trip->end_lat},{$trip->end_lng}";
+            $routeKey = "$start-$end";
+
+            // Fetch from the database instead of calling Google API
+            $routeData = DB::table('trips') // Change to your actual table name
+                ->where('start_lat', $trip->start_lat)
+                ->where('start_lng', $trip->start_lng)
+                ->where('end_lat', $trip->end_lat)
+                ->where('end_lng', $trip->end_lng)
+                ->first();
+
+            // Store in results
+            $results[$routeKey] = [
+                'distance' => $routeData->distance ?? null,
+                'duration' => $routeData->duration ?? null,
+            ];
+        }
+
+        return $results;
     }
     public function contactus(Request $request)
     {
@@ -180,24 +223,61 @@ class DriverDashboardController extends Controller
         $contact->subject = $request->subject;
         $contact->message = $request->message;
         $contact->save();
+        $findCompany = CompanyDriver::where('driver_id', $request->driver_id)->first();
+        if (!$findCompany) {
+            return response()->json(['status' => 404, 'message' => 'Company not found for this driver', 'data' => (object)[]], 404);
+        }
+
+        $company_id = $findCompany->company_id;
+
+        // Fetch the company's FCM tokens
+        $companyFcmTokens = FcmToken::where('user_id', $company_id)->first();
+        if (empty($companyFcmTokens)) {
+            return response()->json(['status' => 404, 'message' => 'No FCM tokens found for this company', 'data' => (object)[]], 404);
+        }
+
+        // Get driver's name
+        $driver = User::find($request->driver_id);
+        $driverName = $driver ? $driver->name : "Unknown Driver";
+
+        // Prepare notification payload
+
+        $deviceToken = $companyFcmTokens->token; // Replace with actual FCM token.
+
+
+        $factory = (new Factory)->withServiceAccount(storage_path('app/zeroifta.json'));
+        $messaging = $factory->createMessaging();
+
+        //Send Notification to Company
+        if (!empty($deviceToken)) {
+            $message = CloudMessage::new()
+                ->withNotification(Notification::create('New Message', $driverName . ' has sent you a new message.'))
+                ->withData([
+
+                    'driver_name' =>$driverName,
+                    'sound' => 'default',
+                ]);
+
+            $messaging->sendMulticast($message, $deviceToken);
+        }
         return response()->json(['status'=>200,'message'=>'Request submitted successfully','data'=>$contact],200);
     }
     public function getAddressFromCoordinates($latitude, $longitude)
-{
-    $apiKey = 'AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg'; // Use config for the API key
-    $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={$latitude},{$longitude}&key={$apiKey}";
+    {
+        $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w'; // Use config for the API key
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={$latitude},{$longitude}&key={$apiKey}";
 
-    $response = file_get_contents($url);
-    $response = json_decode($response, true);
+        $response = file_get_contents($url);
+        $response = json_decode($response, true);
 
-    if (isset($response['results'][0]['address_components'])) {
-        foreach ($response['results'][0]['address_components'] as $component) {
-            if (in_array('administrative_area_level_1', $component['types'])) {
-                return $component['long_name']; // State name
+        if (isset($response['results'][0]['address_components'])) {
+            foreach ($response['results'][0]['address_components'] as $component) {
+                if (in_array('administrative_area_level_1', $component['types'])) {
+                    return $component['long_name']; // State name
+                }
             }
         }
-    }
 
-    return 'Address not found';
-}
+        return 'Address not found';
+    }
 }

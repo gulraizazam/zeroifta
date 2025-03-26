@@ -4,18 +4,19 @@
   @if(Session::has('success'))
   <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: #13975b;color:white">
     {{Session::get('success')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
   @if(Session::has('error'))
   <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #dd4957;color:white">
     {{Session::get('error')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
+
   @endif
   <div class="manage-comp mb-4">
     <div class="Filters-main mb-3 mb-md-4">
@@ -49,13 +50,13 @@
                   <input id="remember-me" name="remember-me" type="checkbox" />
                 </span>
               </th>
-              <th scope="col">{{__('messages.Vehicle Type')}}</th>
-              <th scope="col">{{__('messages.Vehicle Number')}}</th>
-              <th scope="col">{{__('messages.Odometer Reading')}}</th>
-              <th scope="col">{{__('messages.MPG')}}</th>
-              <th scope="col">{{__('messages.Fuel Tank Capacity')}}</th>
-              <th scope="col">{{__('messages.Vehicle Assignment Status')}}</th>
-              <th scope="col">{{__('messages.Action')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Vehicle Type')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Vehicle Number')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Odometer Reading')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.MPG')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Fuel Tank Capacity')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Vehicle Assignment Status')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Action')}}</th>
             </tr>
           </thead>
           <tbody>
@@ -80,15 +81,15 @@
                   <span><a href="{{route('vehicle.edit',$vehicle->id)}}" style="color:var(--gray1)"> {{$vehicle->make}} {{$vehicle->model}} {{$vehicle->make_year}}</a></span>
                 </div>
               </td>
-              <td>
+              <td class="table-text-left">
                 <div>
                   <p>{{$vehicle->license_plate_number}}</p>
 
                 </div>
               </td>
-              <td>{{$vehicle->odometer_reading}}</td>
-              <td>{{$vehicle->mpg}}</td>
-              <td>{{$vehicle->fuel_tank_capacity}}</td>
+              <td class="table-text-left">{{$vehicle->odometer_reading}}</td>
+              <td class="table-text-left">{{$vehicle->mpg}}</td>
+              <td class="table-text-left">{{$vehicle->fuel_tank_capacity}}</td>
               <td>
                 @if($vehicle->vehicle_assigned == 'Vehicle Assigned')
                 <span style="color: green;">{{__('messages.Vehicle Assigned')}}</span>

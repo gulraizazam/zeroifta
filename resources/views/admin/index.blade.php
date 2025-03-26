@@ -1,5 +1,8 @@
 @extends('layouts.new_main')
 @section('content')
+<!-- Add AntV dependencies -->
+<script src="https://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js"></script>
+
 <div class="dash-countMain">
   <div class="container-fluid">
     <!-- Dashboards Count -->
@@ -19,12 +22,12 @@
               </div>
               @if(Auth::user()->role=="admin")
               <div class="count-content">
-              <h5 class="head-16Med grayMain">{{__('messages.Total Companies')}}</h5>
+              <h5 class="head-16Med" style="color: black;">{{__('messages.Total Companies')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\User::whereRole('company')->count()??0}}</h6>
               </div>
               @else
               <div class="count-content">
-                <h5 class="head-16Med grayMain">{{__('messages.Total Drivers')}}</h5>
+                <h5 class="head-16Med" style="color: black;">{{__('messages.Total Drivers')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\CompanyDriver::where('company_id',Auth::id())->count()??0}}</h6>
               </div>
               @endif
@@ -47,12 +50,12 @@
               </div>
               @if(Auth::user()->role=="admin")
               <div class="count-content">
-                <h5 class="head-16Med grayMain">{{__('messages.Subscription')}}</h5>
+                <h5 class="head-16Med" style="color: black;">{{__('messages.Subscription')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\Plan::count()??0}}</h6>
               </div>
               @else
               <div class="count-content">
-                <h5 class="head-16Med grayMain">{{__('messages.Total Vehicles')}}</h5>
+                <h5 class="head-16Med" style="color: black;">{{__('messages.Total Vehicles')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\Vehicle::where('company_id',Auth::id())->count()??0}}</h6>
               </div>
               @endif
@@ -73,12 +76,12 @@
               </div>
               @if(Auth::user()->role=="admin")
               <div class="count-content">
-                <h5 class="head-16Med grayMain">{{__('messages.Payments')}}</h5>
+                <h5 class="head-16Med" style="color: black;">{{__('messages.Payments')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\Payment::count()??0}}</h6>
               </div>
               @else
               <div class="count-content">
-                <h5 class="head-16Med grayMain">{{__('messages.Driver Vehicles')}}</h5>
+                <h5 class="head-16Med" style="color: black;">{{__('messages.Driver Vehicles')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\DriverVehicle::where('company_id',Auth::id())->count()??0}}</h6>
               </div>
               @endif
@@ -99,12 +102,12 @@
               </div>
               @if(Auth::user()->role=="admin")
               <div class="count-content">
-                <h5 class="head-16Med grayMain">{{__('messages.Contact Form')}}</h5>
+                <h5 class="head-16Med" style="color: black;">{{__('messages.Contact Form')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\CompanyContactUs::count()??0}}</h6>
               </div>
               @else
               <div class="count-content">
-                <h5 class="head-16Med grayMain">{{__('messages.Contact Form')}}</h5>
+                <h5 class="head-16Med" style="color: black;">{{__('messages.Contact Form')}}</h5>
                 <h6 class="head-24Med blue">{{\App\Models\Contactus::where('company_id',Auth::id())->count()??0}}</h6>
               </div>
               @endif
@@ -127,8 +130,9 @@
               @endif</h2>
           </div>
           <div>
-            <div class="chart" style="max-width: 1125px; overflow: hidden;">
-              <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+            <div class="chart">
+              <div id="line-chart" style="height: 300px;"></div>
+              <div id="column-chart" style="height: 300px;"></div>
             </div>
           </div>
         </div>
@@ -139,14 +143,14 @@
           @if(Auth::user()->role=='admin')
           <div class="col-lg-6 col-md-12 col.sm-12 col-12 mb-4">
             @else
-            <div class="col-lg-12 col-md-12 col.sm-12 col-12 mb-4">
+            <div class="col-lg-6 col-md-12 col.sm-12 col-12 mb-4">
               @endif
               <div class="sec1-style">
                 <div class="inHead-span">
                   <h2 class="head-20Med">@if(Auth::user()->role=='admin')
                   {{__('messages.Companies overview')}}
                     @else
-                    {{__('messages.Drivers overview')}}
+                    {{__('messages.Drivers')}}
                     @endif</h2>
                 </div>
                 @if(Auth::user()->role=='admin')
@@ -196,7 +200,7 @@
                 @endif
               </div>
             </div>
-            @if(Auth::user()->role=='admin')
+            @if(Auth::user()->role=='admin' || Auth::user()->role=='company')
             @php
             $contacts = \App\Models\CompanyContactUs::with('company')->take(5)->latest()->get();
             @endphp
@@ -249,4 +253,65 @@
 </div>
 
 
+@endsection
+
+@section('scripts')
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Sample data - replace this with your actual data from backend
+    const data = @json($chartData ?? []);
+
+    // Line Chart Configuration
+    const lineChart = new G2Plot.Line('line-chart', {
+      data: data,
+      xField: 'date',
+      yField: 'Drivers',
+      color: '#092e75',
+      height: 300,
+      tooltip: {
+        showCrosshairs: true,
+        shared: true,
+      },
+      point: {
+        size: 3,
+      },
+    });
+
+    // Column Chart Configuration
+    const columnChart = new G2Plot.Column('column-chart', {
+      data: data,
+      xField: 'date',
+      yField: 'Drivers',
+      height: 300,
+      color: '#092e75',
+      tooltip: {
+        showCrosshairs: true,
+        shared: true,
+      },
+    });
+
+    // Render both charts
+    lineChart.render();
+    columnChart.render();
+
+    // Sync tooltips between charts
+    lineChart.on('plot:mousemove', (evt) => {
+      const point = lineChart.getXY(evt.data.data);
+      columnChart.showTooltip(point);
+    });
+
+    columnChart.on('plot:mousemove', (evt) => {
+      const point = columnChart.getXY(evt.data.data);
+      lineChart.showTooltip(point);
+    });
+
+    lineChart.on('plot:mouseleave', () => {
+      columnChart.hideTooltip();
+    });
+
+    columnChart.on('plot:mouseleave', () => {
+      lineChart.hideTooltip();
+    });
+  });
+</script>
 @endsection

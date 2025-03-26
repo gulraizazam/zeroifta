@@ -162,7 +162,7 @@
                 <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <div class="dash-input mb-3">
                         <label class="input-lables pb-2" for="exampleFormControlInput1" class="pb-1">{{__('messages.Profile Picture')}}</label>
-                        <input type="file"  class="form-control login-input" id="exampleFormControlInput1"  name="profile_picture"  />
+                        <input type="file"  class="form-control login-input choose-file-input" id="exampleFormControlInput1"  name="profile_picture"  />
                     </div>
                     @error('profile_picture')
                             <span class="invalid-feedback" role="alert" style="display: block;">

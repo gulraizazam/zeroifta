@@ -146,7 +146,7 @@
                         <div class="price_plans sbsp-com weekly-plan">
                           <div class="ph-area">
                             <h3>Free Trial</h3>
-                            <p style="color:#B60F0F;"> Trial Plan (6 Month Only)</p>
+                            <p> Trial Plan (6 Month Only)</p>
                           </div>
                           <div class="sbp-section">
                             <div>
@@ -174,7 +174,7 @@
                                   </span>
                                   <div>
                                     <p class="">
-                                      <span class="usp-yellow">
+                                      <span class="usp-head">
                                         After the trial period, the subscription will automatically roll into the
                                       </span>
                                       <br>
@@ -191,6 +191,13 @@
                               <p class="usp-para">
                                 Invest in the Premium + Yearly Subscription today and experience the complete power of ZeroIFTA!
                               </p>
+                            </div>
+
+                            <!-- Button -->
+                            <div class="palns-btn mt-5">
+                              <a href="{{route('buy','free_trial')}}" class="mainBtn">
+                               Start Free Trial
+                              </a>
                             </div>
 
                           </div>
@@ -285,7 +292,7 @@
                             <!-- Button -->
                             <div class="palns-btn mt-5">
                               <a href="{{route('buy','basic_monthly')}}" class="mainBtn">
-                                Buy Plan
+                              Start Basic Plan
                               </a>
                             </div>
                           </div>
@@ -299,7 +306,7 @@
                             <span>Recommended</span>
                           </div>
                           <div class="ph-area">
-                            <h3 style="color:#ffbc13;">Premium Plan</h3>
+                            <h3 style="color:#0c388b;">Premium Plan</h3>
                             <p> $67 - Monthly</p>
                           </div>
                           <div class="sbp-section">
@@ -449,7 +456,7 @@
                             <!-- Button -->
                             <div class="palns-btn mt-5">
                               <a href="{{route('buy','premium_monthly')}}" class="mainBtn">
-                                Buy Plan
+                              Start Premium Plan
                               </a>
                             </div>
                           </div>
@@ -562,7 +569,7 @@
                             <!-- Button -->
                             <div class="palns-btn mt-5">
                               <a href="{{route('buy','premium_plus_monthly')}}" class="mainBtn">
-                                Buy Plan
+                              Start Premium+ Plan
                               </a>
                             </div>
                           </div>
@@ -584,7 +591,7 @@
                         <div class="price_plans sbsp-com weekly-plan">
                           <div class="ph-area">
                             <h3>Free Trial</h3>
-                            <p style="color:#B60F0F;"> Trial Plan (6 Month Only)</p>
+                            <p style="color:#0c388b;"> Trial Plan (6 Month Only)</p>
                           </div>
                           <div class="sbp-section">
                             <div>
@@ -612,7 +619,7 @@
                                   </span>
                                   <div>
                                     <p class="">
-                                      <span class="usp-yellow">
+                                      <span class="usp-head">
                                         After the trial period, the subscription will automatically roll into the
                                       </span>
                                       <br>
@@ -631,6 +638,12 @@
                               </p>
                             </div>
 
+                            <!-- Button -->
+                            <div class="palns-btn mt-5">
+                              <a href="{{route('buy','free_trial')}}" class="mainBtn">
+                              Start Free Trial
+                              </a>
+                            </div>
                           </div>
 
                         </div>
@@ -722,7 +735,7 @@
                             <!-- Button -->
                             <div class="palns-btn mt-5">
                               <a href="{{route('buy','basic_yearly')}}" class="mainBtn">
-                                Buy Plan
+                                Start Basic Plan
                               </a>
                             </div>
                           </div>
@@ -736,7 +749,7 @@
                             <span>Recommended</span>
                           </div>
                           <div class="ph-area">
-                            <h3>Premium Plan</h3>
+                            <h3 style="color:#0c388b;">Premium Plan</h3>
                             <p> $730 - Year</p>
                             <span class="pt-1 usp-para">Equivalent to $60.83 per month (9.21% discount)</span>
                           </div>
@@ -887,7 +900,7 @@
                             <!-- Button -->
                             <div class="palns-btn mt-5">
                               <a href="{{route('buy','premium_yearly')}}" class="mainBtn">
-                                Buy Plan
+                                Start Premium Plan
                               </a>
                             </div>
                           </div>
@@ -1014,7 +1027,7 @@
                             <!-- Button -->
                             <div class="palns-btn mt-5">
                               <a href="{{route('buy','premium_plus_yearly')}}" class="mainBtn">
-                                Buy Plan
+                                Start Premium+ Plan
                               </a>
                             </div>
                           </div>

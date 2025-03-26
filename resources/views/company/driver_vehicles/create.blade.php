@@ -5,9 +5,9 @@
     @if(Session::has('error'))
   <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #dd4957;color:white">
     {{Session::get('error')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
     <div class="profileForm-area mb-4">
@@ -62,7 +62,7 @@
         <div class="modal-content">
             <div class="modal-header" style="justify-content: left !important;">
                 <h5 class="modal-title" id="reassignModalLabel">{{__('messages.Reassign Vehicle')}}</h5>
-               
+
             </div>
             <div class="modal-body">
                 <!-- Message will be populated dynamically -->

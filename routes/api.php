@@ -7,11 +7,13 @@ use App\Http\Controllers\FuelStationController;
 use App\Http\Controllers\IFTAController;
 use App\Http\Controllers\IndependentTruckerController;
 use App\Http\Controllers\LoginSessionsController;
+use App\Http\Controllers\NavigationController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\StopController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\TestNotificationController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Http\Request;
@@ -73,7 +75,9 @@ Route::post('dashboard',[DriverDashboardController::class,'index']);
 
     Route::post('/trip/start', [IFTAController::class, 'getDecodedPolyline']);
     Route::post('/get-active-trip', [TripController::class, 'getActiveTrip']);
+    Route::post('/check-active-trip', [TripController::class, 'checkActiveTrip']);
     Route::post('/trip/update', [IFTAController::class, 'updateTrip']);
+    Route::post('/trip/deviate', [TripController::class, 'updateTrip']);
     Route::post('/trip/delete', [TripController::class, 'deleteTrip']);
     Route::post('/trip/complete', [TripController::class, 'completeTrip']);
 
@@ -113,10 +117,16 @@ Route::post('store-login-session', [LoginSessionsController::class, 'storeLoginS
 Route::post('/payment-methods/store', [PaymentMethodController::class, 'addPaymentMethod']);
 Route::post('register',[IndependentTruckerController::class,'store']);
 Route::post('generatetoken',[SubscriptionController::class,'generateToken']);
-
-
+///
+Route::post('get-company-by-driver',[TestNotificationController::class,'getCompanyByDriver']);
+Route::post('get-company-fcm-tokens',[TestNotificationController::class,'getCompanyFCMTokens']);
 
 // Get available subscription plans
 Route::post('/subscription/plans', [SubscriptionController::class, 'getPlans']);
+Route::post('/oauth/token', [App\Http\Controllers\Api\OAuthController::class, 'issueToken']);
+Route::post('/transactions', [App\Http\Controllers\Api\TransactionController::class, 'store'])
+    ->middleware('verify.api.token');
+
+Route::get('/reroute', [NavigationController::class, 'reroute']);
 
 

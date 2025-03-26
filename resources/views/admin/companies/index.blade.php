@@ -14,17 +14,17 @@
   @if(Session::has('success'))
   <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: #13975b;color:white">
     {{Session::get('success')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
   @if(Session::has('error'))
   <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #dd4957;color:white">
     {{Session::get('error')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
 
@@ -85,13 +85,13 @@
             </td>
             <td>
               <div class="tabAction-list">
-              @if($company->role=="trucker")
+              <!-- @if($company->role=="trucker")
                 <span class="hover" href="#" type="button" data-bs-toggle="modal" data-bs-target="#changePassword-{{$company->id}}">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 50 50">
                     <path d="M 25 3 C 18.363281 3 13 8.363281 13 15 L 13 20 L 9 20 C 7.300781 20 6 21.300781 6 23 L 6 47 C 6 48.699219 7.300781 50 9 50 L 41 50 C 42.699219 50 44 48.699219 44 47 L 44 23 C 44 21.300781 42.699219 20 41 20 L 37 20 L 37 15 C 37 8.363281 31.636719 3 25 3 Z M 25 5 C 30.566406 5 35 9.433594 35 15 L 35 20 L 15 20 L 15 15 C 15 9.433594 19.433594 5 25 5 Z M 25 30 C 26.699219 30 28 31.300781 28 33 C 28 33.898438 27.601563 34.6875 27 35.1875 L 27 38 C 27 39.101563 26.101563 40 25 40 C 23.898438 40 23 39.101563 23 38 L 23 35.1875 C 22.398438 34.6875 22 33.898438 22 33 C 22 31.300781 23.300781 30 25 30 Z"></path>
                     </svg>
                   </span>
-                @endif
+                @endif -->
                 <span class="tabEdit-icon">
                   <a href="{{route('companies.edit',$company->id)}}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -147,45 +147,6 @@
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="change_pas_modal modal-comm">
-                  <!-- Modal -->
-                  <div class="modal fade" id="changePassword-{{$company->id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <button type="button" class="closeBtn" data-bs-dismiss="modal" aria-label="Close">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 28 28" fill="none">
-                              <path d="M14 10.8894L24.8894 0L28 3.11062L17.1106 14L28 24.8894L24.8894 28L14 17.1106L3.11062 28L0 24.8894L10.8894 14L0 3.11062L3.11062 0L14 10.8894Z" />
-                            </svg>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-    <h3>{{ __('messages.Change Password') }}</h3>
-    <div class="text-center mt-3">
-        <form method="post" action="{{ route('companies.changePassword', $company->id) }}" id="changePasswordForm">
-            <div class="dash-input mb-3 position-relative">
-                <input type="password" name="password" placeholder="{{ __('messages.Password') }}" class="form-control" id="password">
-                <span class="toggle-password position-absolute" toggle="#password">
-                    <i class="fa fa-eye-slash"></i>
-                </span>
-            </div>
-            <div class="dash-input mb-3 position-relative">
-                <input type="password" name="password_confirmation" placeholder="{{ __('messages.Confirm Password') }}" class="form-control" id="password_confirmation">
-                <span class="toggle-password position-absolute" toggle="#password_confirmation">
-                    <i class="fa fa-eye-slash"></i>
-                </span>
-            </div>
-        </form>
-        <div class="buttons pt-3">
-            <button type="button" class="cancelBtn" data-bs-dismiss="modal">{{ __('messages.Close') }}</button>
-            <button type="submit" id="submitBtn" class="mainBtn">{{ __('messages.Submit') }}</button>
-        </div>
-    </div>
-</div>
                       </div>
                     </div>
                   </div>

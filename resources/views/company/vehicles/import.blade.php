@@ -11,7 +11,7 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12 mb-2">
                     <div class="dash-input mb-3">
                         <label class="input-lables pb-2" for="exampleFormControlInput1" class="pb-1">{{__('messages.File (Excel)')}}</label>
-                        <input type="file" class="form-control login-input" id="exampleFormControlInput1"  name="file" />
+                        <input type="file" class="form-control login-input choose-file-input" id="exampleFormControlInput1"  name="file" />
                     </div>
                     @error('file')
                             <span class="invalid-feedback" role="alert" style="display: block;">

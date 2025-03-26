@@ -50,13 +50,14 @@ class IFTAController extends Controller
         $truckMpg = $request->truck_mpg;
         $fuelTankCapacity = $request->fuel_tank_capacity;
         $currentFuel = $request->total_gallons_present;
+        $bearing = $request->bearing ?? 90;
         // Replace with your Google API key
-        $apiKey = 'AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg';
+        $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
         $stops = Tripstop::where('trip_id', $request->trip_id)->get();
         if ($stops->isNotEmpty()) {
             $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
         }
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
+        $url = "https://maps.googleapis.com/maps/api/directions/json?origin=heading={$bearing}:{$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
         if (isset($waypoints)) {
             $url .= "&waypoints=optimize:true|{$waypoints}";
         }
@@ -69,7 +70,7 @@ class IFTAController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                $stepSize = 7; // Sample every 10th point
+                $stepSize =3; // Sample every 10th point
 
                 foreach ($steps as $step) {
                     if (isset($step['polyline']['points'])) {
@@ -180,6 +181,10 @@ class IFTAController extends Controller
                         'updated_start_lng' => $updatedStartLng,
                         'updated_end_lat' => $updatedEndLat,
                         'updated_end_lng' => $updatedEndLng,
+                        'polyline' => json_encode($polylinePoints),
+                        'polyline_encoded' => $encodedPolyline,
+                        'distance' => $formattedDistance,
+                        'duration'=> $formattedDuration,
                     ]);
                     foreach ($result as $value) {
                         FuelStation::updateOrCreate(
@@ -305,7 +310,8 @@ class IFTAController extends Controller
             'message' => 'Failed to fetch data from Google Maps API.',
             'data'=>(object)[]
         ]);
-}
+    }
+
     public function getDecodedPolyline(Request $request, FcmService $firebaseService)
     {
         // Increase execution time to handle long requests
@@ -344,7 +350,7 @@ class IFTAController extends Controller
         $fuelTankCapacity = $request->fuel_tank_capacity;
         $currentFuel = $request->total_gallons_present;
         // Fetch route data from Google Maps API
-        $apiKey = 'AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg';
+        $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
         $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$startLat},{$startLng}&destination={$endLat},{$endLng}&key={$apiKey}";
 
         // Fetch data from Google Maps API
@@ -355,44 +361,57 @@ class IFTAController extends Controller
            if($data['routes'] && $data['routes'][0]){
             if (!empty($data['routes'][0]['legs'][0]['steps'])) {
                 $steps = $data['routes'][0]['legs'][0]['steps'];
-                $filteredPolylines = [];
+                $decodedCoordinates = [];
+                $stepSize = 7; // Sample every 10th point ...but this approach is not correct
 
-                foreach ($steps as $index => $step) {
+                foreach ($steps as $step) {
                     if (isset($step['polyline']['points'])) {
-                        // Only process steps with odd indices
-                        if ($index % 2 !== 0) {
-                            $filteredPolylines[] = $step['polyline']['points'];
+                        //decode polyline
+                        $points = $this->decodePolyline($step['polyline']['points']);
+
+                        for ($i = 0; $i < count($points); $i += $stepSize) {
+                            $decodedCoordinates[] = $points[$i];
                         }
                     }
                 }
 
-                // Now decode only the selected odd-indexed polylines
-                $decodedCoordinates = [];
-                foreach ($filteredPolylines as $polyline) {
-                    $decodedCoordinates = array_merge($decodedCoordinates, $this->decodePolyline($polyline));
-                }
-            }
+                // Extract polyline points as an array of strings
+                $polylinePoints = array_map(function ($step) {
+                    return $step['polyline']['points'] ?? null;
+                }, $steps);
 
+                // Filter out any null values if necessary
+                $polylinePoints = array_filter($polylinePoints);
+
+
+            }
             $route = $data['routes'][0];
-            // Extract and format distance & duration
-            $distanceText = isset($route['legs'][0]['distance']['text']) ? $route['legs'][0]['distance']['text'] : null;
-            $durationText = isset($route['legs'][0]['duration']['text']) ? $route['legs'][0]['duration']['text'] : null;
+                if($route){
+                    $totalDistance = 0;
+                    $totalDuration = 0;
 
-            // Format distance (e.g., "100 miles")
-            if ($distanceText) {
-                $distanceParts = explode(' ', $distanceText);
-                $formattedDistance = $distanceParts[0] . ' miles'; // Ensuring it always returns distance in miles
-            }
+                    foreach ($route['legs'] as $leg) {
+                        $totalDistance += $leg['distance']['value']; // Distance in meters
+                        $totalDuration += $leg['duration']['value']; // Duration in seconds
+                    }
 
-            // Format duration (e.g., "2 hr 20 min")
-            if ($durationText) {
-                $durationParts = explode(' ', $durationText);
-                $hours = isset($durationParts[0]) ? $durationParts[0] : 0;
-                $minutes = isset($durationParts[2]) ? $durationParts[2] : 0;
-                $formattedDuration = $hours . ' hr ' . $minutes . ' min'; // Formatting as "2 hr 20 min"
+                    // Convert meters to miles
+                    $totalDistanceMiles = round($totalDistance * 0.000621371, 2);
 
-            }
+                    // Convert seconds to hours and minutes
+                    $hours = floor($totalDuration / 3600);
+                    $minutes = floor(($totalDuration % 3600) / 60);
 
+                    // Format distance
+                    $formattedDistance = $totalDistanceMiles . ' miles';
+
+                    // Format duration
+                    if ($hours > 0) {
+                        $formattedDuration = "{$hours} hr {$minutes} min";
+                    } else {
+                        $formattedDuration = "{$minutes} min";
+                    }
+                }
             if (isset($data['routes'][0]['overview_polyline']['points'])) {
                 $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
                 $decodedPolyline = $this->decodePolyline($encodedPolyline);
@@ -445,11 +464,25 @@ class IFTAController extends Controller
 
                 }
                 // Create a new trip record
+               $startLocation = $this->getAddressFromCoordinates($request->start_lat, $request->start_lng);
+               $endLocation = $this->getAddressFromCoordinates($request->end_lat, $request->end_lng);
+
                 $fuelStations = [];
                 $validatedData['updated_start_lat'] = $request->start_lat;
                 $validatedData['updated_start_lng'] = $request->start_lng;
                 $validatedData['updated_end_lat'] = $request->end_lat;
                 $validatedData['updated_end_lng'] = $request->end_lng;
+                $validatedData['polyline'] = json_encode($polylinePoints);
+                $validatedData['polyline_encoded'] = $encodedPolyline;
+                $validatedData['distance'] = $formattedDistance;
+                $validatedData['duration'] = $formattedDuration;
+                $validatedData['start_address'] = $startLocation['full_address'];
+                $validatedData['end_address'] = $endLocation['full_address'];
+                $validatedData['start_city'] = $startLocation['city'];
+                $validatedData['start_state'] = $startLocation['state'];
+                $validatedData['end_city'] = $startLocation['city'];
+                $validatedData['end_state'] = $startLocation['state'];
+
                 $trip = Trip::create($validatedData);
                foreach ($result as  $value) {
                     // Prepare fuel station data for processing
@@ -532,37 +565,33 @@ class IFTAController extends Controller
         $lat = 0;
         $lng = 0;
 
-        while ($index < $len) {
-            $b = 0;
-            $shift = 0;
-            $result = 0;
+    while ($index < $len) {
+        $shift = 0;
+        $result = 0;
 
-            do {
-                $b = ord($encoded[$index++]) - 63;
-                $result |= ($b & 0x1f) << $shift;
-                $shift += 5;
-            } while ($b >= 0x20);
+        do {
+            $b = ord($encoded[$index++]) - 63;
+            $result |= ($b & 0x1f) << $shift;
+            $shift += 5;
+        } while ($b >= 0x20);
 
-            $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-            $lat += $dlat;
+        $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+        $lat += $dlat;
 
-            $shift = 0;
-            $result = 0;
+        $shift = 0;
+        $result = 0;
 
-            do {
-                $b = ord($encoded[$index++]) - 63;
-                $result |= ($b & 0x1f) << $shift;
-                $shift += 5;
-            } while ($b >= 0x20);
+        do {
+            $b = ord($encoded[$index++]) - 63;
+            $result |= ($b & 0x1f) << $shift;
+            $shift += 5;
+        } while ($b >= 0x20);
 
-            $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-            $lng += $dlng;
+        $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+        $lng += $dlng;
 
-            $points[] = [
-                'lat' => number_format($lat * 1e-5, 5),
-                'lng' => number_format($lng * 1e-5, 5),
-            ];
-        }
+        $points[] = ['lat' => $lat / 1E5, 'lng' => $lng / 1E5];
+    }
 
         return $points;
     }
@@ -651,7 +680,7 @@ class IFTAController extends Controller
             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
             sin($lngDelta / 2) * sin($lngDelta / 2);
 
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c; // Distance in meters
     }
@@ -1106,6 +1135,43 @@ class IFTAController extends Controller
         return $fuelStations->values()->all();
     }
 
+    public function getAddressFromCoordinates($latitude, $longitude)
+    {
+        $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w'; // Store API key in config
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={$latitude},{$longitude}&key={$apiKey}";
+
+        $response = file_get_contents($url);
+        $response = json_decode($response, true);
+
+        if (isset($response['results'][0])) {
+            $addressComponents = $response['results'][0]['address_components'];
+            $fullAddress = $response['results'][0]['formatted_address']; // Full address
+
+            $city = '';
+            $state = '';
+
+            foreach ($addressComponents as $component) {
+                if (in_array('administrative_area_level_1', $component['types'])) {
+                    $state = $component['long_name']; // State name
+                }
+                if (in_array('locality', $component['types'])) {
+                    $city = $component['long_name']; // City name
+                }
+            }
+
+            return [
+                'full_address' => $fullAddress,
+                'city' => $city,
+                'state' => $state,
+            ];
+        }
+
+        return [
+            'full_address' => 'Address not found',
+            'city' => 'City not found',
+            'state' => 'State not found',
+        ];
+    }
 
 public function optimizedFuelStationsWithDistance($tripData)
 {
@@ -1184,44 +1250,7 @@ public function optimizedFuelStationsWithDistance($tripData)
  * @param string $encoded
  * @return array
  */
-private function decodePolyline1(string $encoded): array
-{
-    $points = [];
-    $index = 0;
-    $len = strlen($encoded);
-    $lat = 0;
-    $lng = 0;
 
-    while ($index < $len) {
-        $shift = 0;
-        $result = 0;
-
-        do {
-            $b = ord($encoded[$index++]) - 63;
-            $result |= ($b & 0x1f) << $shift;
-            $shift += 5;
-        } while ($b >= 0x20);
-
-        $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-        $lat += $dlat;
-
-        $shift = 0;
-        $result = 0;
-
-        do {
-            $b = ord($encoded[$index++]) - 63;
-            $result |= ($b & 0x1f) << $shift;
-            $shift += 5;
-        } while ($b >= 0x20);
-
-        $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-        $lng += $dlng;
-
-        $points[] = ['lat' => $lat / 1E5, 'lng' => $lng / 1E5];
-    }
-
-    return $points;
-}
 
 /**
  * Calculate distance between two coordinates using Haversine formula

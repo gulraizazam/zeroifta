@@ -1,5 +1,15 @@
 @extends('layouts.new_main')
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .toggle-password {
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+    }
+</style>
 <div class="dashbord-inner">
     <!-- Section 1 -->
     <div class="profileForm-area mb-4">
@@ -201,11 +211,132 @@
             <div class="buttons">
                 <a href="{{route('companies')}}" class="cancelBtn">{{__('messages.Cancel')}}</a>
                 <button type="submit"  class="mainBtn">{{__('messages.Submit')}}</button>
+                @if($company->role == "trucker")
+                <button type="button" class="mainBtn ms-2" data-bs-toggle="modal" data-bs-target="#changePassword">
+                    {{__('messages.Change Password')}}
+                </button>
+                @endif
             </div>
         </div>
 </form>
     </div>
+
+    <!-- Change Password Modal -->
+    @if($company->role == "trucker")
+    <div class="change_pas_modal modal-comm">
+        <div class="modal fade" id="changePassword" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="closeBtn" data-bs-dismiss="modal" aria-label="Close">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 28 28" fill="none">
+                                <path d="M14 10.8894L24.8894 0L28 3.11062L17.1106 14L28 24.8894L24.8894 28L14 17.1106L3.11062 28L0 24.8894L10.8894 14L0 3.11062L3.11062 0L14 10.8894Z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h3>{{ __('messages.Change Password') }}</h3>
+                        <div class="text-center mt-3">
+                            <form method="post" action="{{ route('companies.changePassword', $company->id) }}" id="changePasswordForm">
+                                <div class="dash-input mb-3 position-relative">
+                                    <input type="password" name="password" placeholder="{{ __('messages.Password') }}" class="form-control" id="password">
+                                    <span class="toggle-password position-absolute" toggle="#password">
+                                        <i class="fa fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                                <div class="dash-input mb-3 position-relative">
+                                    <input type="password" name="password_confirmation" placeholder="{{ __('messages.Confirm Password') }}" class="form-control" id="password_confirmation">
+                                    <span class="toggle-password position-absolute" toggle="#password_confirmation">
+                                        <i class="fa fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </form>
+                            <div class="buttons pt-3">
+                                <button type="button" class="cancelBtn" data-bs-dismiss="modal">{{ __('messages.Close') }}</button>
+                                <button type="submit" id="submitBtn" class="mainBtn">{{ __('messages.Submit') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
+@endsection
 
+@section('scripts')
+<script>
+$(document).ready(function() {
+    $('#submitBtn').click(function() {
+        // Get values
+        var password = $('#password').val();
+        var password_confirmation = $('#password_confirmation').val();
+
+        // Validate password and confirm password
+        if (password.length < 8) {
+            alert('Password must be at least 8 characters long.');
+            return;
+        }
+
+        if (password !== password_confirmation) {
+            alert('Password and Confirm Password must be the same.');
+            return;
+        }
+
+        // Prepare the form data for AJAX submission
+        var formData = {
+            password: password,
+            password_confirmation: password_confirmation,
+            _token: '{{ csrf_token() }}'  // CSRF token for security
+        };
+
+        // AJAX call to submit the form
+        $.ajax({
+            url: $('#changePasswordForm').attr('action'),
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.status === 200) {
+                    alert('Password changed successfully');
+                    // Close the modal (Bootstrap modal)
+                    window.location.reload();
+                } else {
+                    alert('An error occurred while changing the password.');
+                }
+            },
+            error: function(xhr, status, error) {
+                // Handle errors (for example, validation errors)
+                var errors = xhr.responseJSON.errors;
+                if (errors) {
+                    if (errors.password) {
+                        alert(errors.password[0]); // Display password validation error
+                    }
+                    if (errors.password_confirmation) {
+                        alert(errors.password_confirmation[0]); // Display password confirmation error
+                    }
+                }
+            }
+        });
+    });
+});
+
+document.querySelectorAll(".toggle-password").forEach(function (toggle) {
+    toggle.addEventListener("click", function () {
+        let input = document.querySelector(this.getAttribute("toggle"));
+        let icon = this.querySelector("i");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        }
+    });
+});
+</script>
 @endsection

@@ -3,7 +3,9 @@
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
-
+use Aws\CloudWatchLogs\CloudWatchLogsClient;
+use Monolog\Logger;
+use Monolog\Handler\CloudWatch;
 return [
 
     /*
@@ -117,6 +119,25 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+        'cloudwatch' => [
+        'driver' => 'monolog',
+        'handler' => \Monolog\Handler\CloudWatchHandler::class,
+        'level' => env('LOG_LEVEL', 'debug'),
+        'handler_with' => [
+            'client' => new CloudWatchLogsClient([
+                'region'  => env('AWS_DEFAULT_REGION', 'us-east-1'),
+                'version' => 'latest',
+                'credentials' => [
+                    'key'    => env('AWS_ACCESS_KEY_ID'),
+                    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                ],
+            ]),
+            'logGroupName'  => env('CLOUDWATCH_LOG_GROUP', 'zeroifta-logs'),
+            'logStreamName' => env('CLOUDWATCH_LOG_STREAM', 'app-log-stream'),
+            'retention'     => env('CLOUDWATCH_LOG_RETENTION_DAYS', 7), // Days before logs are deleted
+            'batchSize'     => 1000, // Default batch size for logs
+        ],
+    ],
     ],
 
 ];

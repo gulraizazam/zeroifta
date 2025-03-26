@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyContactUs;
+use App\Models\FcmToken;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
 
 class ContactUsController extends Controller
 {
@@ -22,7 +28,24 @@ class ContactUsController extends Controller
             'sender' => $request->sender,
             'user_id' => Auth::id(),
         ]);
+        $findCompany = CompanyContactUs::where('id', $request->contact_id)->first();
+        $company = $findCompany->company_id;
+        $findDriver = User::find($company);
+        $companyFcmTokens = FcmToken::where('user_id', $company)->first();
+        $factory = (new Factory)->withServiceAccount(storage_path('app/zeroifta.json'));
+        $messaging = $factory->createMessaging();
+        if (!empty($companyFcmTokens)) {
+            $message = CloudMessage::new()
+                ->withNotification(Notification::create('New Message','A new message has been received.'))
+                ->withData([
+                   
+                    'driver_name' => $findDriver->name,
+                    'sound' => 'default',
+                ]);
 
+            $messaging->sendMulticast($message, $companyFcmTokens->token);
+        }
+        
         return response()->json(['success' => 'Message sent']);
     }
 

@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
 		'localizationRedirect' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,
 		'localeSessionRedirect' => \Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect::class,
         'localeViewPath' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath::class,
+        'verify.api.token' => \App\Http\Middleware\VerifyApiTokenMiddleware::class,
     ];
 }

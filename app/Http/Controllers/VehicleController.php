@@ -64,22 +64,30 @@ class VehicleController extends Controller
         }
     }
     public function allVehicles(Request $request)
-    {
-        $driverVehicles = DriverVehicle::where('driver_id',$request->driver_id)->get();
-        $vehicles = Vehicle::whereIn('id', $driverVehicles->pluck('vehicle_id'))->select('id','vehicle_image','vehicle_number','mpg','odometer_reading','fuel_left','fuel_tank_capacity','model','make','make_year','license_plate_number')->get();
-        if(count($vehicles) >0){
-            foreach ($vehicles as $vehicle) {
-                if (isset($vehicle->vehicle_image)) {
-                    $vehicle->vehicle_image = url('/vehicles/' . $vehicle->vehicle_image);
-                }
+{
+    $driverVehicles = DriverVehicle::where('driver_id', $request->driver_id)->get();
+    $vehicles = Vehicle::whereIn('id', $driverVehicles->pluck('vehicle_id'))
+        ->select('id', 'vehicle_image', 'vehicle_number', 'mpg', 'odometer_reading', 'fuel_left', 'fuel_tank_capacity', 'model', 'make', 'make_year', 'license_plate_number', 'vin')
+        ->get();
+
+    if ($vehicles->isNotEmpty()) {
+        // Count occurrences of each VIN
+        $vinCounts = $vehicles->pluck('vin')->countBy();
+
+        foreach ($vehicles as $vehicle) {
+            if (isset($vehicle->vehicle_image)) {
+                $vehicle->vehicle_image = url('/vehicles/' . $vehicle->vehicle_image);
             }
-            return response()->json(['status'=>200,'message'=>'vehicles found','data'=>$vehicles],200);
-        }else{
-            return response()->json(['status'=>404,'message'=>'vehicles not found','data'=>[]],404);
+
+            // Check if the VIN appears more than once
+            $vehicle->is_duplicate_vin = $vinCounts[$vehicle->vin] > 1;
         }
 
-
+        return response()->json(['status' => 200, 'message' => 'vehicles found', 'data' => $vehicles], 200);
+    } else {
+        return response()->json(['status' => 404, 'message' => 'vehicles not found', 'data' => []], 404);
     }
+}
 
 
     public function allTrips(Request $request)
@@ -95,7 +103,7 @@ class VehicleController extends Controller
         $vehicles = Vehicle::whereIn('id', $driverVehicles)->get()->keyBy('id');
 
         // API key (move to .env for security)
-        $apiKey = 'AIzaSyBtQuABE7uPsvBnnkXtCNMt9BpG9hjeDIg';
+        $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
 
         $geocodedTrips = $trips->map(function ($trip) use ($driverVehicles, $vehicles, $apiKey) {
             $vehicleId = $driverVehicles[$trip->user_id] ?? null;

@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Factory;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Log;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -50,6 +50,10 @@ Route::get('/get-fcm-token', function () {
     $token = DB::table('fcm_tokens')->where('user_id', auth()->id())->value('token');
     return response()->json(['fcm_token' => $token]);
 });
+Route::get('/test-log', function () {
+    Log::channel('cloudwatch')->info('This is a test log from Laravel.');
+    return "Log sent to CloudWatch!";
+});
 Route::post('/store-fcm-token', function (Request $request) {
     $request->validate(['fcm_token' => 'required|string']);
 
@@ -68,7 +72,7 @@ Route::post('/store-fcm-token', function (Request $request) {
         ]);
     }
     // Store the token in the database
-    
+
     return response()->json(['message' => 'Token stored successfully']);
 });
 Route::get('/notifications/count', function () {
@@ -108,6 +112,9 @@ Route::get('maptest', function () {
 });
 Route::get('terms-and-conditions', function () {
   return view('terms-and-conditions');
+});
+Route::get('testroute', function () {
+  return view('testsocket');
 });
 Route::get('/read-dat-file', [UsersController::class, 'readDatFile'])->name('read.dat.file');
 Route::get('/subscription', [AdminController::class, 'subscription']);

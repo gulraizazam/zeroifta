@@ -4,17 +4,17 @@
   @if(Session::has('success'))
   <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: #13975b;color:white">
     {{Session::get('success')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
   @if(Session::has('error'))
   <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #dd4957;color:white">
     {{Session::get('error')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
   <!-- Section 1 -->

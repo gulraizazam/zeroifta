@@ -32,4 +32,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error("Error updating theme:", error);
             });
     });
+
+        // Change the label text to "Entries per page"
+        let labels = document.querySelectorAll("label[for^='dt-length']");
+        labels.forEach(label => {
+            if (label.innerText.trim() === "entries per page") {
+                label.innerText = "Entries per page";
+            }
+        });
+
+        // Hide alerts after 3 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+        setTimeout(function() {
+          alert.style.transition = 'opacity 0.5s';
+          alert.style.opacity = '0';
+          setTimeout(function() {
+            alert.style.display = 'none';
+          }, 500);
+        }, 3000);
+        });
+
+
+
 });

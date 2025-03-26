@@ -5,9 +5,9 @@
     @if(Session::has('error'))
   <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #dd4957;color:white">
     {{Session::get('error')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
     <div class="profileForm-area mb-4">
@@ -265,11 +265,11 @@
                             </span>
                         @enderror
                 </div>
-                
+
                 <div class="col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
                     <div class="dash-input mb-3">
                         <label class="input-lables pb-2" for="exampleFormControlInput1" class="pb-1">{{__('messages.Image')}}</label>
-                        <input type="file" required name="image" class="form-control login-input" accept="image/png, image/jpg, image/jpeg">
+                        <input type="file" required name="image" class="form-control login-input choose-file-input" accept="image/png, image/jpg, image/jpeg">
 
                     </div>
                     @error('image')

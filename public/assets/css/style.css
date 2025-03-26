@@ -126,7 +126,7 @@ body {
 }
 
 /* ========================================================================
-Common Css 
+Common Css
 ==========================================================================*/
 body {
     background: var(--body-bg);
@@ -633,7 +633,10 @@ Main Dashboard
 .body-right {
     max-height: 100vh;
     overflow-y: scroll;
-    width: 100%;
+    width: calc(100vw - 300px);
+    @media screen and (max-width: 1024px) {
+        width: 100vw;
+    }
 }
 .dashboard-rigt {
     width: 100%;
@@ -770,7 +773,7 @@ Main Dashboard
     background-color: rgba(225, 225, 225, 0.1);
 }
 /* ========================================================================
-SideBar 
+SideBar
 ========================================================================= */
 .sideBar {
     background: var(--sidebar-gred-light);
@@ -862,7 +865,7 @@ a.sidebar_li.menu_active .head-14Nor {
 }
 
 /* ========================================================================
-Right Side 
+Right Side
 ========================================================================= */
 h1 {
     color: var(--h1color);
@@ -1060,8 +1063,8 @@ h1 {
     gap: 30px;
 }
 .user-area img {
-    height: 30px;
-    width: 30px;
+    height: 50px;
+    width: 50px;
     border-radius: 50%;
 }
 .ub-div {
@@ -1264,7 +1267,7 @@ Companies Managemnet
 .tabAction-list {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 7px;
 }
 .tabAction-list span {
     width: 36px;
@@ -1398,8 +1401,8 @@ Subscription Plan
 }
 .usp-ys {
     font-size: 18px;
+    color: #0c388b;
     font-weight: 600;
-    color: #ffbc13;
     text-transform: capitalize;
 }
 .sub-toggel .slider {
@@ -1612,7 +1615,7 @@ Fleet View
     color: #979797;
 }
 /* =========================================================
-Media Quries 
+Media Quries
 ============================================================ */
 @media only screen and (max-width: 1600px) {
     .sidebar_li {
@@ -1919,4 +1922,30 @@ Media Quries
     .subs-PlansMain {
         padding: 0 1px;
     }
+}
+
+
+.choose-file-input {
+    padding-left: 17px !important;
+}
+
+.rounded-image {
+    border-radius: 50% !important;
+}
+
+.table-text-left {
+    text-align: left !important;
+}
+
+button.page-link {
+    width: 45px !important;
+    font-size: 18px !important;
+    padding: 7px 10px !important;
+    font-weight: 500 !important;
+}
+
+.chart {
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
 }

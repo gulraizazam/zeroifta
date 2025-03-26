@@ -4,17 +4,17 @@
   @if(Session::has('success'))
   <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: #13975b;color:white">
     {{Session::get('success')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
   @if(Session::has('error'))
   <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #dd4957;color:white">
     {{Session::get('error')}}
-    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+    <!-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </button> -->
   </div>
   @endif
   <div class="manage-comp mb-4">
@@ -33,7 +33,7 @@
           </div>
           <div class="filter-btn">
             <a class="blueLine_btn" href="{{route('payment_method.add')}}">{{__('messages.Add Payment Method')}}+</a>
-            
+
           </div>
         </div>
       </div>
@@ -44,45 +44,45 @@
         <table id="example" class="table table-comm">
           <thead>
             <tr>
-             
-              <th scope="col">{{__('messages.Name')}}</th>
-              <th scope="col">{{__('messages.Brand')}}</th>
-              <th scope="col">{{__('messages.Expiry Month')}}</th>
-              <th scope="col">{{__('messages.Expiry Year')}}</th>
-              <th scope="col">{{__('messages.Last4')}}</th>
-              <th scope="col">{{__('messages.Is Default')}}</th>
-              <th scope="col">{{__('messages.Action')}}</th>
+
+              <th scope="col" class="table-text-left">{{__('messages.Name')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Brand')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Expiry Month')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Expiry Year')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Last4')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Is Default')}}</th>
+              <th scope="col" class="table-text-left">{{__('messages.Action')}}</th>
             </tr>
           </thead>
           <tbody>
             @foreach($filteredMethods as $method)
             <tr data-payment-method-id="{{ $method['id'] }}">
-              
 
-              <td>
+
+              <td class="table-text-left">
                 <div class="table-conTab">
-                  
+
                   <span> {{$method['name']}}</span>
                 </div>
               </td>
-              <td>
+              <td class="table-text-left">
                 <div>
                   <p>{{$method['brand']}}</p>
 
                 </div>
               </td>
-              <td>{{$method['expiry_month']}}</td>
-              <td>{{$method['expiry_year']}}</td>
-              <td>{{$method['last4']}}</td>
-              
-              <td>
+              <td class="table-text-left">{{$method['expiry_month']}}</td>
+              <td class="table-text-left">{{$method['expiry_year']}}</td>
+              <td class="table-text-left">{{$method['last4']}}</td>
+
+              <td class="table-text-left">
                 @if($method['is_default'] == true)
                 <span style="color: green;">{{__('messages.Yes')}}</span>
                 @else
                 <span style="color: red;">{{__('messages.No')}}</span>
                 @endif
             </td>
-              <td>
+              <td class="table-text-left">
                 <div class="tabAction-list">
                 @if($method['is_default'] == true)
                 <span class="label label-success">{{__('messages.Default')}}</span>
@@ -90,7 +90,7 @@
                 <a href="{{route('make_default',$method['id'])}}" class="set-default-btn btn btn-primary">{{__('messages.Set as Default')}}</a>
                  @endif
 
-                 
+
                 </div>
               </td>
             </tr>
@@ -104,4 +104,3 @@
   </div>
 </div>
 @endsection
-
