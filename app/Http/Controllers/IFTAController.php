@@ -287,7 +287,7 @@ class IFTAController extends Controller
                         'status' => 200,
                         'message' => 'Fuel stations fetched successfully.',
                         'data' => $responseData,
-                    ]);
+                    ],200);
                 }
 
                 return response()->json([
@@ -300,7 +300,7 @@ class IFTAController extends Controller
                     'status' => 500,
                     'message' => 'Failed to fetch data from Google Maps API.',
                     'data'=>(object)[]
-                ]);
+                ],500);
             }
 
         }
@@ -309,7 +309,7 @@ class IFTAController extends Controller
             'status' => 500,
             'message' => 'Failed to fetch data from Google Maps API.',
             'data'=>(object)[]
-        ]);
+        ],500);
     }
 
     public function getDecodedPolyline(Request $request, FcmService $firebaseService)
@@ -332,7 +332,7 @@ class IFTAController extends Controller
         $findTrip = Trip::where('user_id', $validatedData['user_id'])->where('status', 'active')->first();
 
         if ($findTrip) {
-            return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => $findTrip]);
+            return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => $findTrip],422);
         }
          // Set trip status to active
         $validatedData['status']='active';
@@ -538,7 +538,7 @@ class IFTAController extends Controller
                     'status' => 200,
                     'message' => 'Fuel stations fetched successfully.',
                     'data' => $responseData,
-                ]);
+                ],200);
             }
 
 
@@ -547,13 +547,13 @@ class IFTAController extends Controller
                 'status' => 500,
                 'message' => 'Failed to fetch data from Google Maps API.',
                 'data'=>(object)[]
-            ]);
+            ],500);
            }
 
         }
 
         return response()->json([
-            'status' => false,
+            'status' => 500,
             'message' => 'Failed to fetch polyline.',
         ], 500);
     }

@@ -40,7 +40,7 @@ class TripController extends Controller
         //Step 2: Check if a trip already exists for this user
         $findTrip = Trip::where('user_id', $validatedData['user_id'])->where('status', 'active')->first();
         if ($findTrip) {
-            return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => (object)[]]);
+            return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => (object)[]],422);
         }
         $validatedData['status']='active';
 
@@ -309,7 +309,7 @@ class TripController extends Controller
                 'message' => 'Trip updated successfully',
                 'data' => $tripDetailResponse
             ]
-
+                ,200
             );
 
 
@@ -319,7 +319,7 @@ class TripController extends Controller
             'status' => 500,
             'message' => 'Failed to fetch data from Google Maps API.',
             'data'=>(object)[]
-        ]);
+        ],500);
     }
     private function getBestForwardRoute($routes, $currentLocation, $userBearing)
 {
@@ -615,7 +615,7 @@ class TripController extends Controller
         $trip = Trip::where('user_id', $user_id)->where('status', 'active')->orderBy('created_at', 'desc')->first();
 
         if (!$trip) {
-            return response()->json(['status' =>404, 'message' => 'No trip found for this user', 'data' => (object)[]]);
+            return response()->json(['status' =>404, 'message' => 'No trip found for this user', 'data' => (object)[]], 404);
         }
         return response()->json([
             'status' => 200,
@@ -633,22 +633,22 @@ class TripController extends Controller
                     ];
                 }),
             ]
-        ]);
+        ], 200);
         // return response()->json(['status' => 200, 'message' => 'Trip retrieved successfully', 'data' => $trip]);
     }
     public function deleteTrip(Request $request)
     {
         $trip = Trip::whereId($request->trip_id)->first();
         if (!$trip) {
-            return response()->json(['status' => 404, 'message' => 'No trip found for this user', 'data' => (object)[]]);
+            return response()->json(['status' => 404, 'message' => 'No trip found for this user', 'data' => (object)[]], 404);
         }
         $trip->delete();
-        return response()->json(['status' => 200, 'message' => 'Trip deleted successfully', 'data' => (object)[]]);
+        return response()->json(['status' => 200, 'message' => 'Trip deleted successfully', 'data' => (object)[]], 200);
     }
     public function completeTrip(Request $request){
         $trip = Trip::whereId($request->trip_id)->first();
         if (!$trip) {
-            return response()->json(['status' => 404, 'message' => 'No trip found', 'data' => (object)[]]);
+            return response()->json(['status' => 404, 'message' => 'No trip found', 'data' => (object)[]], 404);
         }
 
         $trip->status = $request->status;
@@ -721,7 +721,7 @@ class TripController extends Controller
                 }
             }
         }
-        return response()->json(['status' => 200, 'message' => 'Trip status updated successfully', 'data' => (object)[]]);
+        return response()->json(['status' => 200, 'message' => 'Trip status updated successfully', 'data' => (object)[]], 200);
     }
     function fetchFileDataAndMatchCoordinates($latitude, $longitude)
     {
@@ -781,7 +781,7 @@ class TripController extends Controller
                 'polyline_points'=>json_decode($trip->polyline,true),
                 'encoded_polyline'=>$trip->polyline_encoded
             ]
-        ]);
+        ], 200);
     }
 
     public function getActiveTrip(Request $request)
@@ -1165,7 +1165,7 @@ class TripController extends Controller
                 'status' => 422,
                 'message' => $validator->errors()->first(),
                 'data' => (object) [],
-            ]);
+            ],422);
         }
 
         // Save stops
