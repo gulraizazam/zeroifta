@@ -136,7 +136,7 @@ class TripController extends Controller
             //$route = $data['routes'][0];
             $currentLocation = $startLat.','.$startLng;
             $bestRoute = $this->getBestForwardRoute($routes, $currentLocation,$userBearing);
-
+            
             $legs = $bestRoute['legs'];
             $decodedCoordinates = [];
             $stepSize = 7; // Sample every 3rd point
@@ -216,6 +216,9 @@ class TripController extends Controller
             ];
             $trip = Trip::find($request->trip_id);
             $result = $this->markOptimumFuelStations($tripDetailResponse);
+            if($result==false){
+                $result = $matchingRecords;
+            }
             foreach ($result as $value) {
                 FuelStation::updateOrCreate(
                     [
