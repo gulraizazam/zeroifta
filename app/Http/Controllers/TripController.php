@@ -1381,7 +1381,7 @@ class TripController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'trip_id' => 'required|exists:trips,id',
-            'stop_id' => 'required|exists:trip_stops,id',
+            'stop_id' => 'required|exists:tripstops,id',
             
         ]);
 
