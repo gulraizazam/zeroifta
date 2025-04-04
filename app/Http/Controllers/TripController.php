@@ -272,6 +272,7 @@ class TripController extends Controller
                 'duration' => $formattedDuration,
             ]);
             unset($trip->vehicle_id);
+            unset($trip->polyline);
             $tripDetailResponse = [
 
                 'trip_id'=>$trip->id,
@@ -979,7 +980,7 @@ class TripController extends Controller
         }
 
         unset($trip->vehicle_id);
-
+        unset($trip->polyline);
         if($trip){
             $trip->distance = $trip->distance;
             $trip->duration = $trip->duration;
@@ -1361,6 +1362,7 @@ class TripController extends Controller
             $trip->duration = $formattedDuration;
             $trip->user_id = (int)$trip->user_id;
             $stops = Tripstop::where('trip_id', $trip->id)->get();
+            unset($trip->polyline);
             $response = [
                 'trip_id' => $trip->id,
                 'trip' => $trip,
@@ -1595,6 +1597,7 @@ class TripController extends Controller
             $trip->duration = $formattedDuration;
             $trip->user_id = (int)$trip->user_id;
             $stops = Tripstop::where('trip_id', $trip->id)->get();
+            unset($trip->polyline);
             $response = [
                 'trip_id' => $trip->id,
                 'trip' => $trip,

@@ -226,7 +226,7 @@ class IFTAController extends Controller
                         $vehicle=null;
                     }
 
-
+                    unset($trip->polyline);
                     // Create a separate key for the polyline
                     $responseData = [
                         'trip_id' => $request->trip_id,
@@ -522,7 +522,7 @@ class IFTAController extends Controller
                 }else{
                     $vehicle = null;
                 }
-
+                unset($trip->polyline);
                 $responseData = [
                     'trip_id'=>$trip->id,
                     'trip' => $trip,
