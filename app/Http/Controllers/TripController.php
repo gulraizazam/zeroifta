@@ -790,15 +790,14 @@ class TripController extends Controller
         $encodedPolyline = $trip->polyline_encoded;
         $decodedPolyline = $this->decodePolyline($encodedPolyline);
         $finalFilteredPolyline = array_filter($decodedPolyline, function ($coordinate) use ($updatedStartLat, $updatedStartLng, $updatedEndLat, $updatedEndLng) {
-            if (isset($coordinate['lat'], $coordinate['lng'])) {
-                // Calculate distances from both start and end points
-                $distanceFromStart = $this->haversineDistanceFilter($updatedStartLat, $updatedStartLng, $coordinate['lat'], $coordinate['lng']);
-                $distanceFromEnd = $this->haversineDistanceFilter($updatedEndLat, $updatedEndLng, $coordinate['lat'], $coordinate['lng']);
-
-                // Keep coordinates if they are sufficiently far from both points
-                return $distanceFromStart > 9 && $distanceFromEnd > 9;
+            if (!isset($coordinate['lat'], $coordinate['lng'])) {
+                return false;
             }
-            return false; // Skip invalid coordinates
+
+            $distanceFromStart = $this->haversineDistanceFilter($updatedStartLat, $updatedStartLng, $coordinate['lat'], $coordinate['lng']);
+            $distanceFromEnd = $this->haversineDistanceFilter($updatedEndLat, $updatedEndLng, $coordinate['lat'], $coordinate['lng']);
+
+            return ($distanceFromStart > 9 && $distanceFromEnd > 9);
         });
         $finalFilteredPolyline = array_values($finalFilteredPolyline);
         $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
@@ -867,6 +866,7 @@ class TripController extends Controller
             return response()->json(['status'=>404,'message'=>'trip not found','data'=>(object)[]],404);
         }
         $stops = Tripstop::where('trip_id', $trip->id)->get();
+
         $driverVehicle = DriverVehicle::where('driver_id', $trip->user_id)->first();
         if($driverVehicle && $driverVehicle->vehicle_id != null){
             $vehicle = Vehicle::where('id', $driverVehicle->vehicle_id)->first();
