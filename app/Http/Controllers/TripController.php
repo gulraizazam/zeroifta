@@ -803,8 +803,7 @@ class TripController extends Controller
         $finalFilteredPolyline = array_values($finalFilteredPolyline);
         $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
         $currentTrip = Trip::where('id', $trip->id)->first();
-        $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->value('vehicle_id');
-
+        $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
         if($vehicle_id){
             $findVehicle = Vehicle::where('id', $vehicle_id->vehicle_id)->first();
             $truckMpg = $findVehicle->mpg;
