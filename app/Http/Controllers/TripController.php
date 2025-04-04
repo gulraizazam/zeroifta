@@ -766,7 +766,7 @@ class TripController extends Controller
 
     public function getActiveTrip(Request $request)
     {
-        $trip = Trip::select('id', 'user_id', 'start_lat', 'start_lng', 'end_lat', 'end_lng', 'updated_start_lat', 'updated_start_lng', 'updated_end_lat', 'updated_end_lng', 'polyline', 'polyline_encoded')
+        $trip = Trip::select('id', 'user_id', 'start_lat', 'start_lng', 'end_lat', 'end_lng', 'updated_start_lat', 'updated_start_lng', 'updated_end_lat', 'updated_end_lng', 'polyline', 'polyline_encoded','distance','duration')
         ->where('id', $request->trip_id)
         ->first();
         $startLat = $trip->start_lat;
