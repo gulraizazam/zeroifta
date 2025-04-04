@@ -839,28 +839,25 @@ class TripController extends Controller
             if($result==false){
                 $result = $matchingRecords;
             }
-            foreach ($result as  $value) {
-
-
-                FuelStation::updateOrCreate(
-                    [
-                        'trip_id' => $trip->id, // Condition to check if the record exists
-                        'latitude' => $value['ftpLat'],
-                        'longitude' => $value['ftpLng']
-                    ],
-                    [
-                        'name' => $value['fuel_station_name'],
-                        'price' => $value['price'],
-                        'lastprice' => $value['lastprice'],
-                        'discount' => $value['discount'],
-                        'ifta_tax' => $value['IFTA_tax'],
-                        'is_optimal' => $value['isOptimal'] ?? false,
-                        'address' => $value['address'],
-                        'gallons_to_buy' => $value['gallons_to_buy'],
-                        'trip_id' => $trip->id,
-                        'user_id' => $trip->user_id,
-                    ]
-                );
+            $insertData = [];
+            foreach ($result as $value) {
+                $insertData[] = [
+                    'trip_id' => $trip->id,
+                    'latitude' => $value['ftpLat'],
+                    'longitude' => $value['ftpLng'],
+                    'name' => $value['fuel_station_name'],
+                    'price' => $value['price'],
+                    'lastprice' => $value['lastprice'],
+                    'discount' => $value['discount'],
+                    'ifta_tax' => $value['IFTA_tax'],
+                    'is_optimal' => $value['isOptimal'] ?? false,
+                    'address' => $value['address'],
+                    'gallons_to_buy' => $value['gallons_to_buy'],
+                    'user_id' => $trip->user_id,
+                ];
+            }
+            if (!empty($insertData)) {
+                FuelStation::upsert($insertData, ['trip_id', 'latitude', 'longitude'], ['price', 'lastprice', 'discount', 'ifta_tax', 'is_optimal', 'address', 'gallons_to_buy']);
             }
         }else{
             return response()->json(['status'=>404,'message'=>'trip not found','data'=>(object)[]],404);
