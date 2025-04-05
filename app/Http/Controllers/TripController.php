@@ -1231,7 +1231,7 @@ class TripController extends Controller
                         ];
                    }
                 }
-                FuelStation::insert($fuelStations);
+                //FuelStation::insert($fuelStations);
 
             }
         }
