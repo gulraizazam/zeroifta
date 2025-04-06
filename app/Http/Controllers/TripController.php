@@ -853,7 +853,7 @@ class TripController extends Controller
                     'ifta_tax' => $value['IFTA_tax'],
                     'is_optimal' => $value['isOptimal'] ?? false,
                     'address' => $value['address'],
-                    'gallons_to_buy' => $value['gallons_to_buy'],
+                    'gallons_to_buy' => $value['gallons_to_buy'] ?? null,
                     'user_id' => $trip->user_id,
                 ];
             }
