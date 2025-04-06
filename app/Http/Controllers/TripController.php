@@ -780,7 +780,7 @@ class TripController extends Controller
         $updatedEndLng = $trip->updated_end_lng;
         $polylinePoints = json_decode($trip->polyline, true);
         $decodedCoordinates = [];
-        $stepSize = 7; // Sample every 3rd point
+        $stepSize = 100; // Sample every 3rd point
         foreach ($polylinePoints as $points) {
             $decodedPoints = $this->decodePolyline($points);
             for ($i = 0; $i < count($decodedPoints); $i += $stepSize) {
