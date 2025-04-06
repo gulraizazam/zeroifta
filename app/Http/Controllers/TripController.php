@@ -126,20 +126,19 @@ class TripController extends Controller
        if (isset($waypoints)) {
             $url .= "&waypoints=optimize:true|{$waypoints}";
         }
-        \Log::info($url);
+        //\Log::info($url);
         // Fetch data from Google Maps API
         $response = Http::get($url);
 
         if ($response->successful()) {
             $data = $response->json();
             $routes = $data['routes'];
-            //$route = $data['routes'][0];
             $currentLocation = $startLat.','.$startLng;
             $bestRoute = $this->getBestForwardRoute($routes, $currentLocation,$userBearing);
 
             $legs = $bestRoute['legs'];
             $decodedCoordinates = [];
-            $stepSize = 100; // Sample every 3rd point
+            $stepSize = 150; // Sample every 3rd point
             $polylinePoints = [];
             $totalDistance = 0;
             $totalDuration = 0;
