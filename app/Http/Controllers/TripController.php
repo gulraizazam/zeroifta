@@ -139,7 +139,7 @@ class TripController extends Controller
 
             $legs = $bestRoute['legs'];
             $decodedCoordinates = [];
-            $stepSize = 7; // Sample every 3rd point
+            $stepSize = 100; // Sample every 3rd point
             $polylinePoints = [];
             $totalDistance = 0;
             $totalDuration = 0;
