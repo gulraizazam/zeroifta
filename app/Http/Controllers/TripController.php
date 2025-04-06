@@ -779,7 +779,7 @@ class TripController extends Controller
         $updatedEndLng = $trip->updated_end_lng;
         $polylinePoints = json_decode($trip->polyline, true);
         $decodedCoordinates = [];
-        $stepSize = 100; // Sample every 3rd point
+        $stepSize = 150; // Sample every 3rd point
         foreach ($polylinePoints as $points) {
             $decodedPoints = $this->decodePolyline($points);
             for ($i = 0; $i < count($decodedPoints); $i += $stepSize) {
@@ -1103,7 +1103,7 @@ class TripController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                    $stepSize = 7; // Sample every 10th point
+                    $stepSize = 150; // Sample every 10th point
 
                     foreach ($steps as $step) {
                         if (isset($step['polyline']['points'])) {
@@ -1338,7 +1338,7 @@ class TripController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                    $stepSize = 7; // Sample every 10th point
+                    $stepSize = 150; // Sample every 10th point
 
                     foreach ($steps as $step) {
                         if (isset($step['polyline']['points'])) {
