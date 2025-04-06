@@ -50,14 +50,14 @@ class IFTAController extends Controller
         $truckMpg = $request->truck_mpg;
         $fuelTankCapacity = $request->fuel_tank_capacity;
         $currentFuel = $request->total_gallons_present;
-        $bearing = $request->bearing ?? 90;
+        //$bearing = $request->bearing ?? 90;
         // Replace with your Google API key
         $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
         $stops = Tripstop::where('trip_id', $request->trip_id)->get();
         if ($stops->isNotEmpty()) {
             $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
         }
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin=heading={$bearing}:{$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
+        $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
         if (isset($waypoints)) {
             $url .= "&waypoints=optimize:true|{$waypoints}";
         }
@@ -70,17 +70,17 @@ class IFTAController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                $stepSize =150; // Sample every 10th point
+                    $stepSize =150; // Sample every 10th point
 
-                foreach ($steps as $step) {
-                    if (isset($step['polyline']['points'])) {
-                        $points = $this->decodePolyline($step['polyline']['points']);
-                        // Sample every 10th point
-                        for ($i = 0; $i < count($points); $i += $stepSize) {
-                            $decodedCoordinates[] = $points[$i];
+                    foreach ($steps as $step) {
+                        if (isset($step['polyline']['points'])) {
+                            $points = $this->decodePolyline($step['polyline']['points']);
+                            // Sample every 10th point
+                            for ($i = 0; $i < count($points); $i += $stepSize) {
+                                $decodedCoordinates[] = $points[$i];
+                            }
                         }
                     }
-                }
                     $polylinePoints = [];
 
                     foreach ($data['routes'][0]['legs'] as $leg) {

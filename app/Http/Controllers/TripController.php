@@ -136,17 +136,17 @@ class TripController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                $stepSize =150; // Sample every 10th point
+                    $stepSize =150; // Sample every 10th point
 
-                foreach ($steps as $step) {
-                    if (isset($step['polyline']['points'])) {
-                        $points = $this->decodePolyline($step['polyline']['points']);
-                        // Sample every 10th point
-                        for ($i = 0; $i < count($points); $i += $stepSize) {
-                            $decodedCoordinates[] = $points[$i];
+                    foreach ($steps as $step) {
+                        if (isset($step['polyline']['points'])) {
+                            $points = $this->decodePolyline($step['polyline']['points']);
+                            // Sample every 10th point
+                            for ($i = 0; $i < count($points); $i += $stepSize) {
+                                $decodedCoordinates[] = $points[$i];
+                            }
                         }
                     }
-                }
                     $polylinePoints = [];
 
                     foreach ($data['routes'][0]['legs'] as $leg) {
@@ -213,33 +213,33 @@ class TripController extends Controller
                    // $matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $reserve_fuel = $request->reserve_fuel;
 
-                 $totalFuel = $currentFuel+$reserve_fuel;
-                $tripDetailResponse = [
-                    'data' => [
-                        'trip' => [
-                            'start' => [
-                                'latitude' => $updatedStartLat,
-                                'longitude' => $updatedStartLng
+                    $totalFuel = $currentFuel+$reserve_fuel;
+                    $tripDetailResponse = [
+                        'data' => [
+                            'trip' => [
+                                'start' => [
+                                    'latitude' => $updatedStartLat,
+                                    'longitude' => $updatedStartLng
+                                ],
+                                'end' => [
+                                    'latitude' => $updatedEndLat,
+                                    'longitude' => $updatedEndLng
+                                ]
                             ],
-                            'end' => [
-                                'latitude' => $updatedEndLat,
-                                'longitude' => $updatedEndLng
-                            ]
-                        ],
-                        'vehicle' => [
-                            'mpg' => $truckMpg,
-                            'fuelLeft' => $totalFuel
-                        ],
-                        'fuelStations' => $matchingRecords,
-                        'polyline'=>$decodedCoordinates
+                            'vehicle' => [
+                                'mpg' => $truckMpg,
+                                'fuelLeft' => $totalFuel
+                            ],
+                            'fuelStations' => $matchingRecords,
+                            'polyline'=>$decodedCoordinates
 
-                    ]
-                ];
+                        ]
+                    ];
 
-                $result = $this->markOptimumFuelStations($tripDetailResponse);
-                if($result==false){
-                    $result = $matchingRecords;
-                }
+                    $result = $this->markOptimumFuelStations($tripDetailResponse);
+                    if($result==false){
+                        $result = $matchingRecords;
+                    }
                    // $result = $this->findOptimalFuelStation($startLat, $startLng, $truckMpg, $currentFuel, $matchingRecords, $endLat, $endLng);
                     $trip = Trip::find($request->trip_id);
                     $trip->update([
@@ -252,27 +252,27 @@ class TripController extends Controller
                         'distance' => $formattedDistance,
                         'duration'=> $formattedDuration,
                     ]);
-                    foreach ($result as $value) {
-                        FuelStation::updateOrCreate(
-                            [
-                                'trip_id' => $trip->id, // Condition to check if the record exists
-                                'latitude' => $value['ftpLat'],
-                                'longitude' => $value['ftpLng']
-                            ],
-                            [
-                                'name' => $value['fuel_station_name'],
-                                'price' => $value['price'],
-                                'lastprice' => $value['lastprice'],
-                                'discount' => $value['discount'],
-                                'ifta_tax' => $value['IFTA_tax'],
-                                'is_optimal' => $value['isOptimal'] ?? false,
-                                'address' => $value['address'],
-                                'gallons_to_buy' => $value['gallons_to_buy'],
-                                'trip_id' => $trip->id,
-                                'user_id' => $trip->user_id,
-                            ]
-                        );
+                    FuelStation::where('trip_id', $trip->id)->delete();
+                    foreach ($result as  $value) {
+                        // Prepare fuel station data for processing
+                        $fuelStations[] = [
+                            'name' => $value['fuel_station_name'],
+                            'latitude' => $value['ftpLat'],
+                            'longitude' => $value['ftpLng'],
+                            'price' => $value['price'],
+                            'lastprice' => $value['lastprice'],
+                            'discount' => $value['discount'],
+                            'ifta_tax' => $value['IFTA_tax'],
+                            'is_optimal' => $value['isOptimal'] ?? false,
+                            'address' => $value['address'] ?? 'N/A',
+                            'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
+                            'trip_id' => $trip->id,
+                            'user_id' => $validatedData['user_id'],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
                     }
+                    FuelStation::insert($fuelStations);
                     $trip->distance = $formattedDistance;
                     $trip->duration = $formattedDuration;
                     $stops = Tripstop::where('trip_id', $trip->id)->get();
@@ -304,63 +304,21 @@ class TripController extends Controller
                         'stops' => $stops,
                         'vehicle' => $vehicle
                     ];
-                    $findDriver = User::where('id', $trip->user_id)->first();
-                    if($findDriver){
-
-                     $findCompany = CompanyDriver::where('driver_id',$findDriver->id)->first();
-                     if ($findCompany) {
-                        $driverFcm = FcmToken::where('user_id', $findDriver->id)->pluck('token')->toArray();
-                        $companyFcmTokens = FcmToken::where('user_id', $findCompany->company_id)
-                        ->pluck('token')
-                        ->toArray();
-
-                        if (!empty($companyFcmTokens)) {
-                            $factory = (new Factory)->withServiceAccount(storage_path('app/zeroifta.json'));
-                            $messaging = $factory->createMessaging();
-
-                            // Create the notification payload
-                            $message = CloudMessage::new()
-                                ->withNotification(Notification::create('Trip Updated', $findDriver->name . 'has updated a trip.'))
-                                ->withData([
-                                    'trip_id' => (string) $trip->id,  // Include trip ID for reference
-                                    'driver_name' => $findDriver->name, // Driver's name
-                                    'sound' => 'default',  // This triggers the sound
-                                ]);
-
-                            // Send notification to all FCM tokens of the company
-                            $response = $messaging->sendMulticast($message, $companyFcmTokens);
-                        }
-                        if (!empty($driverFcm)) {
-                            $factory = (new Factory)->withServiceAccount(storage_path('app/zeroifta.json'));
-                            $messaging = $factory->createMessaging();
-
-                            $message = CloudMessage::new()
-                                ->withNotification(Notification::create('Trip Updated', 'Trip updated successfully'))
-                                ->withData([
-                                    'sound' => 'default', // This triggers the sound
-                                ]);
-
-                            $response = $messaging->sendMulticast($message, $driverFcm);
-                            ModelsNotification::create([
-                                'user_id' => $findCompany->company_id,
-                                'title' => 'Trip Updated',
-                                'body' => $findDriver->name . ' has updated a trip.',
-                            ]);
-                        }
-                    }
-                    }
+                    
                     return response()->json([
                         'status' => 200,
                         'message' => 'Fuel stations fetched successfully.',
                         'data' => $responseData,
                     ],200);
+                }else{
+                    return response()->json([
+                        'status' => 404,
+                        'message' => 'No route found.',
+                        'data'=>(object)[]
+                    ], 404);
                 }
 
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'No route found.',
-                    'data'=>(object)[]
-                ], 404);
+               
             }else{
                 return response()->json([
                     'status' => 500,
