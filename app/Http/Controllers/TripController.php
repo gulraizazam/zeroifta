@@ -267,7 +267,7 @@ class TripController extends Controller
                             'address' => $value['address'] ?? 'N/A',
                             'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
                             'trip_id' => $trip->id,
-                            'user_id' => $validatedData['user_id'],
+                            'user_id' => $trip->user_id,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ];
