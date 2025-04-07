@@ -272,7 +272,10 @@ class TripController extends Controller
                             'updated_at' => now(),
                         ];
                     }
-                    FuelStation::insert($fuelStations);
+                    if(!empty($fuelStations)){
+                        FuelStation::insert($fuelStations);
+                    }
+
                     $trip->distance = $formattedDistance;
                     $trip->duration = $formattedDuration;
                     $stops = Tripstop::where('trip_id', $trip->id)->get();
