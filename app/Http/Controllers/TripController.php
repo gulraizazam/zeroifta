@@ -1129,7 +1129,7 @@ class TripController extends Controller
         $response = Http::get($url);
         if ($response->successful()) {
             $data = $response->json();
-            dd($data);
+
             if($data['routes'] && $data['routes'][0]){
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
@@ -1263,6 +1263,8 @@ class TripController extends Controller
                 }
                 FuelStation::insert($fuelStations);
 
+            }else{
+                return response()->json(['status'=>500,'message'=>'invalid coordinates','data'=>[]],500);
             }
         }
         $trip->update([
