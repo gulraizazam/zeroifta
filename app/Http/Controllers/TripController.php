@@ -1276,7 +1276,10 @@ class TripController extends Controller
                         ];
                    }
                 }
-                FuelStation::insert($fuelStations);
+                if(!empty($fuelStations)){
+                    FuelStation::insert($fuelStations);
+                }
+
 
             }else{
                 return response()->json(['status'=>500,'message'=>'invalid coordinates','data'=>(object)[]],500);
