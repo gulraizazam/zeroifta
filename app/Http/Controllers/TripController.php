@@ -1264,7 +1264,7 @@ class TripController extends Controller
                 FuelStation::insert($fuelStations);
 
             }else{
-                return response()->json(['status'=>500,'message'=>'invalid coordinates','data'=>[]],500);
+                return response()->json(['status'=>500,'message'=>'invalid coordinates','data'=>(object)[]],500);
             }
         }
         $trip->update([
