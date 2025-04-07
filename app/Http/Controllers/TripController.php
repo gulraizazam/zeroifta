@@ -241,6 +241,7 @@ class TripController extends Controller
                     if($result==false){
                         $result = $matchingRecords;
                     }
+                    $fuelStations = [];
                    // $result = $this->findOptimalFuelStation($startLat, $startLng, $truckMpg, $currentFuel, $matchingRecords, $endLat, $endLng);
                     $trip = Trip::find($request->trip_id);
                     $trip->update([
@@ -845,7 +846,7 @@ class TripController extends Controller
             $truckMpg = $findVehicle->mpg;
             $currentFuel = $findVehicle->fuel_left;
             $reserve_fuel = $findVehicle->reserve_fuel ?? 0;
-
+            $fuelStations = [];
             $totalFuel = $currentFuel+$reserve_fuel;
             $tripDetailResponse = [
                 'data' => [
@@ -893,7 +894,10 @@ class TripController extends Controller
                     'updated_at' => now(),
                 ];
             }
-            FuelStation::insert($fuelStations);
+            if(!empty($fuelStations)){
+                FuelStation::insert($fuelStations);
+            }
+
 
         }else{
             return response()->json(['status'=>404,'message'=>'trip not found','data'=>(object)[]],404);
@@ -1238,7 +1242,7 @@ class TripController extends Controller
 
                     ]
                 ];
-
+                $fuelStations = [];
                 $result = $this->markOptimumFuelStations($tripDetailResponse);
                 if($result==false){
                     $result = $matchingRecords;
@@ -1505,7 +1509,10 @@ class TripController extends Controller
                         ];
                    }
                 }
-                FuelStation::insert($fuelStations);
+                if(!empty($fuelStations)){
+                    FuelStation::insert($fuelStations);
+                }
+
 
             }
         }
