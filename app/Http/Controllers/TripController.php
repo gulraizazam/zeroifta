@@ -1138,7 +1138,7 @@ class TripController extends Controller
 
         // Append waypoints only if they exist
         if (!empty($waypoints)) {
-            $url .= "&waypoints=optimize:true|{$waypoints}";
+            $url .= "&waypoints=" . urlencode($waypoints);
         }
         $response = Http::get($url);
         if ($response->successful()) {
