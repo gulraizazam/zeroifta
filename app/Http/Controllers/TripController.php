@@ -810,7 +810,7 @@ class TripController extends Controller
         $updatedStartLng = $trip->updated_start_lng;
         $updatedEndLat =$trip->updated_end_lat;
         $updatedEndLng = $trip->updated_end_lng;
-        $polylinePoints = json_decode($trip->polyline, true);
+        $polylinePoints =$trip->polyline;
         $decodedCoordinates = [];
         $stepSize = 150; // Sample every 3rd point
         foreach ($polylinePoints as $points) {
@@ -874,25 +874,25 @@ class TripController extends Controller
             }
             $insertData = [];
             FuelStation::where('trip_id', $trip->id)->delete();
-                    foreach ($result as  $value) {
-                        $fuelStations[] = [
-                            'name' => $value['fuel_station_name'] ??'N/A',
-                            'latitude' => $value['ftpLat'] ?? 0,
-                            'longitude' => $value['ftpLng'] ?? 0,
-                            'price' => $value['price'] ?? 0,
-                            'lastprice' => $value['lastprice'] ?? 0,
-                            'discount' => $value['discount'] ?? 0,
-                            'ifta_tax' => $value['IFTA_tax'] ?? 0,
-                            'is_optimal' => $value['isOptimal'] ?? false,
-                            'address' => $value['address'] ?? 'N/A',
-                            'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
-                            'trip_id' => $trip->id,
-                            'user_id' => $trip->user_id,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
-                   }
-                   FuelStation::insert($fuelStations);
+            foreach ($result as  $value) {
+                $fuelStations[] = [
+                    'name' => $value['fuel_station_name'] ??'N/A',
+                    'latitude' => $value['ftpLat'] ?? 0,
+                    'longitude' => $value['ftpLng'] ?? 0,
+                    'price' => $value['price'] ?? 0,
+                    'lastprice' => $value['lastprice'] ?? 0,
+                    'discount' => $value['discount'] ?? 0,
+                    'ifta_tax' => $value['IFTA_tax'] ?? 0,
+                    'is_optimal' => $value['isOptimal'] ?? false,
+                    'address' => $value['address'] ?? 'N/A',
+                    'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
+                    'trip_id' => $trip->id,
+                    'user_id' => $trip->user_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            FuelStation::insert($fuelStations);
 
         }else{
             return response()->json(['status'=>404,'message'=>'trip not found','data'=>(object)[]],404);
@@ -1272,7 +1272,7 @@ class TripController extends Controller
             }
         }
         $trip->update([
-            'polyline'=>json_encode($polylinePoints),
+            'polyline'=>$polylinePoints,
             'polyline_encoded'=>$encodedPolyline,
             'duration'=>$formattedDuration,
             'distance'=>$formattedDistance
