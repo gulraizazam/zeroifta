@@ -304,7 +304,7 @@ class TripController extends Controller
                         'stops' => $stops,
                         'vehicle' => $vehicle
                     ];
-                    
+
                     return response()->json([
                         'status' => 200,
                         'message' => 'Fuel stations fetched successfully.',
@@ -318,7 +318,7 @@ class TripController extends Controller
                     ], 404);
                 }
 
-               
+
             }else{
                 return response()->json([
                     'status' => 500,
@@ -329,7 +329,7 @@ class TripController extends Controller
 
         }
 
-       
+
     }
     private function getBestForwardRoute($routes, $currentLocation, $userBearing)
 {
@@ -1129,6 +1129,7 @@ class TripController extends Controller
         $response = Http::get($url);
         if ($response->successful()) {
             $data = $response->json();
+            dd($data);
             if($data['routes'] && $data['routes'][0]){
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
