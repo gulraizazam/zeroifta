@@ -14,6 +14,7 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use App\Models\User;
 use App\Models\Vehicle;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -1091,7 +1092,7 @@ class TripController extends Controller
             ];
         }, $request->stops);
 
-        Tripstop::insert($stopsData);
+
         $trip = Trip::whereId($request->trip_id)->first();
 
         unset($trip->vehicle_id);
@@ -1104,12 +1105,39 @@ class TripController extends Controller
         $updatedEndLat =$trip->updated_end_lat;
         $updatedEndLng = $trip->updated_end_lng;
         $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
-        $stops = Tripstop::where('trip_id', $request->trip_id)->get();
-        if ($stops->isNotEmpty()) {
-            $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
+
+        $stopsData = array_map(function ($stop) use ($request) {
+            return [
+                'trip_id' => $request->trip_id,
+                'stop_name' => $stop['stop_name'] ?? null,
+                'stop_lat' => $stop['stop_lat'],
+                'stop_lng' => $stop['stop_lng'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }, $request->stops);
+
+        // Convert array to collection
+        $stopsCollection = collect($stopsData);
+
+        // Generate waypoints if stops exist
+        $waypoints = $stopsCollection->isNotEmpty()
+            ? $stopsCollection->map(fn($stop) => "{$stop['stop_lat']},{$stop['stop_lng']}")->implode('|')
+            : null;
+
+        // Ensure required variables are set
+        if (!isset($updatedStartLat, $updatedStartLng, $updatedEndLat, $updatedEndLng, $apiKey)) {
+            throw new Exception("Missing required parameters for Google Maps API.");
         }
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
-        if ($waypoints) {
+
+        // Build the Google Maps API URL
+        $url = "https://maps.googleapis.com/maps/api/directions/json?"
+            . "origin={$updatedStartLat},{$updatedStartLng}"
+            . "&destination={$updatedEndLat},{$updatedEndLng}"
+            . "&key={$apiKey}";
+
+        // Append waypoints only if they exist
+        if (!empty($waypoints)) {
             $url .= "&waypoints=optimize:true|{$waypoints}";
         }
         $response = Http::get($url);
@@ -1117,6 +1145,7 @@ class TripController extends Controller
             $data = $response->json();
 
             if($data['routes'] && $data['routes'][0]){
+                Tripstop::insert($stopsData);
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
