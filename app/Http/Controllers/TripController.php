@@ -293,13 +293,13 @@ class TripController extends Controller
                     }
 
                     unset($trip->polyline);
+                    unset($trip->polyline_encoded);
                     // Create a separate key for the polyline
                     $responseData = [
                         'trip_id' => $request->trip_id,
                         'trip' => $trip,
                         'fuel_stations' => $result, // Fuel stations with optimal station marked
-                        'polyline' => $decodedPolyline,
-                        'encoded_polyline'=>$encodedPolyline,
+
                         'polyline_paths' => $polylinePoints ?? [],
                         'stops' => $stops,
                         'vehicle' => $vehicle
@@ -906,6 +906,7 @@ class TripController extends Controller
 
         unset($trip->vehicle_id);
         unset($trip->polyline);
+        unset($trip->polyline_encoded);
         if($trip){
             $trip->distance = $trip->distance;
             $trip->duration = $trip->duration;
@@ -914,8 +915,7 @@ class TripController extends Controller
                 'trip_id' => $trip->id,
                 'trip' => $trip,
                 'fuel_stations' => $result,
-                'polyline' => $decodedPolyline,
-                'encoded_polyline'=>$encodedPolyline,
+
                 'polyline_paths'=>$polylinePoints,
                 'stops' => $stops,
                 'vehicle' => $vehicle
@@ -1291,12 +1291,12 @@ class TripController extends Controller
             $trip->user_id = (int)$trip->user_id;
             $stops = Tripstop::where('trip_id', $trip->id)->get();
             unset($trip->polyline);
+            unset($trip->polyline_encoded);
             $response = [
                 'trip_id' => $trip->id,
                 'trip' => $trip,
                 'fuel_stations' => $result ?? [],
-                'polyline' => $decodedPolyline,
-                'encoded_polyline'=>$encodedPolyline,
+
                 'polyline_paths' => $polylinePoints ?? [],
                 'stops' => $stops,
                 'vehicle' => $vehicle
@@ -1526,12 +1526,12 @@ class TripController extends Controller
             $trip->user_id = (int)$trip->user_id;
             $stops = Tripstop::where('trip_id', $trip->id)->get();
             unset($trip->polyline);
+            unset($trip->polyline_encoded);
             $response = [
                 'trip_id' => $trip->id,
                 'trip' => $trip,
                 'fuel_stations' => $result ?? [],
-                'polyline' => $decodedPolyline,
-                'encoded_polyline'=>$encodedPolyline,
+
                 'polyline_paths' => $polylinePoints ?? [],
                 'stops' => $stops,
                 'vehicle' => $vehicle

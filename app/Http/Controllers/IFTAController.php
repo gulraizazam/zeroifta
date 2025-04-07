@@ -227,13 +227,13 @@ class IFTAController extends Controller
                     }
 
                     unset($trip->polyline);
+                    unset($trip->polyline_encoded);
                     // Create a separate key for the polyline
                     $responseData = [
                         'trip_id' => $request->trip_id,
                         'trip' => $trip,
                         'fuel_stations' => $result, // Fuel stations with optimal station marked
-                        'polyline' => $decodedPolyline,
-                        'encoded_polyline'=>$encodedPolyline,
+
                         'polyline_paths' => $polylinePoints ?? [],
                         'stops' => $stops,
                         'vehicle' => $vehicle
@@ -349,7 +349,7 @@ class IFTAController extends Controller
         $truckMpg = $request->truck_mpg;
         $fuelTankCapacity = $request->fuel_tank_capacity;
         $currentFuel = $request->total_gallons_present;
-        
+
         // Fetch route data from Google Maps API
         $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
         $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$startLat},{$startLng}&destination={$endLat},{$endLng}&key={$apiKey}";
@@ -374,7 +374,7 @@ class IFTAController extends Controller
                             }
                         }
                     }
-                
+
                     // Extract polyline points as an array of strings
                     $polylinePoints = array_map(function ($step) {
                         return $step['polyline']['points'] ?? null;
@@ -523,12 +523,13 @@ class IFTAController extends Controller
                         $vehicle = null;
                     }
                     unset($trip->polyline);
+                    unset($trip->polyline_encoded);
                     $responseData = [
                         'trip_id'=>$trip->id,
                         'trip' => $trip,
                         'fuel_stations' => $result,
-                        'polyline' => $decodedPolyline,
-                        'encoded_polyline'=>$encodedPolyline,
+
+
                         'polyline_paths'=>$polylinePoints ?? [],
                         'stops'=>[],
                         'vehicle' => $vehicle
