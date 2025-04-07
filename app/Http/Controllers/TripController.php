@@ -1214,7 +1214,7 @@ class TripController extends Controller
                     $findVehicle = Vehicle::where('id', $vehicle_id->vehicle_id)->first();
                     $truckMpg = $findVehicle->mpg;
                     $currentFuel = $findVehicle->fuel_left;
-                    $fuelStations = [];
+
                     $reserve_fuel = $findVehicle->reserve_fuel ?? 0;
 
                  $totalFuel = $currentFuel+$reserve_fuel;
