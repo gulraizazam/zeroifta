@@ -299,7 +299,7 @@ class TripController extends Controller
                     unset($trip->polyline_encoded);
                     // Create a separate key for the polyline
                     $responseData = [
-                        'trip_id' => $request->trip_id,
+                        'trip_id' => (int)$request->trip_id,
                         'trip' => $trip,
                         'fuel_stations' => $result, // Fuel stations with optimal station marked
 
