@@ -1116,36 +1116,24 @@ class TripController extends Controller
                 'updated_at' => now(),
             ];
         }, $request->stops);
-
-        // Convert array to collection
-        $stopsCollection = collect($stopsData);
-
-        // Generate waypoints if stops exist
-        $waypoints = $stopsCollection->isNotEmpty()
-            ? $stopsCollection->map(fn($stop) => "{$stop['stop_lat']},{$stop['stop_lng']}")->implode('|')
-            : null;
-
-        // Ensure required variables are set
-        if (!isset($updatedStartLat, $updatedStartLng, $updatedEndLat, $updatedEndLng, $apiKey)) {
-            throw new Exception("Missing required parameters for Google Maps API.");
+        Tripstop::insert($stopsData);
+        $stops = Tripstop::where('trip_id', $request->trip_id)->get();
+        if ($stops->isNotEmpty()) {
+            $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
+        }
+        $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
+        if (isset($waypoints)) {
+            $url .= "&waypoints=optimize:true|{$waypoints}";
         }
 
         // Build the Google Maps API URL
-        $url = "https://maps.googleapis.com/maps/api/directions/json?"
-            . "origin={$updatedStartLat},{$updatedStartLng}"
-            . "&destination={$updatedEndLat},{$updatedEndLng}"
-            . "&key={$apiKey}";
 
-        // Append waypoints only if they exist
-        if (!empty($waypoints)) {
-            $url .= "&waypoints=optimize:true|{$waypoints}";
-        }
         $response = Http::get($url);
         if ($response->successful()) {
             $data = $response->json();
 
             if($data['routes'] && $data['routes'][0]){
-                Tripstop::insert($stopsData);
+
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
