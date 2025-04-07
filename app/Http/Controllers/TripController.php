@@ -1285,12 +1285,13 @@ class TripController extends Controller
                 return response()->json(['status'=>500,'message'=>'invalid coordinates','data'=>(object)[]],500);
             }
         }
-        $trip->update([
+        Trip::where('id', $trip->id)->update([
             'polyline'=>json_encode($polylinePoints),
             'polyline_encoded'=>$encodedPolyline,
             'duration'=>$formattedDuration,
             'distance'=>$formattedDistance
         ]);
+
         $vehiclefind = DriverVehicle::where('driver_id', $trip->user_id)->pluck('vehicle_id')->first();
         if($vehiclefind){
             $vehicle = Vehicle::where('id', $vehiclefind)->first();
