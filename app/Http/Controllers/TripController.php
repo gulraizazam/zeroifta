@@ -810,7 +810,7 @@ class TripController extends Controller
         $updatedStartLng = $trip->updated_start_lng;
         $updatedEndLat =$trip->updated_end_lat;
         $updatedEndLng = $trip->updated_end_lng;
-        $polylinePoints =$trip->polyline;
+        $polylinePoints = json_decode($trip->polyline, true);
         $decodedCoordinates = [];
         $stepSize = 150; // Sample every 3rd point
         foreach ($polylinePoints as $points) {
@@ -1272,7 +1272,7 @@ class TripController extends Controller
             }
         }
         $trip->update([
-            'polyline'=>$polylinePoints,
+            'polyline'=>json_encode($polylinePoints),
             'polyline_encoded'=>$encodedPolyline,
             'duration'=>$formattedDuration,
             'distance'=>$formattedDistance
