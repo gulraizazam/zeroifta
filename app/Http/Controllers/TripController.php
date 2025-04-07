@@ -1091,25 +1091,25 @@ class TripController extends Controller
 
         Tripstop::insert($stopsData);
         $trip = Trip::whereId($request->trip_id)->first();
-        $fuelStations = FuelStation::where('trip_id', $request->trip_id)->get()
-            ->map(function ($station) {
-                // Convert the station to an array, keeping all attributes
-                $data = $station->toArray();
+        // $fuelStations = FuelStation::where('trip_id', $request->trip_id)->get()
+        //     ->map(function ($station) {
+        //         // Convert the station to an array, keeping all attributes
+        //         $data = $station->toArray();
 
-                // Add the new keys
-                $data['ftp_lat'] = $data['latitude'];
-                $data['ftp_lng'] = $data['longitude'];
-                $data['fuel_station_name'] = $data['name'];
-                $data['IFTA_tax'] = floatval(preg_replace('/[^0-9.-]/', '', $station->ifta_tax));
-                $data['lastprice'] = floatval(preg_replace('/[^0-9.-]/', '', $station->lastprice));
-                $data['price'] = floatval(preg_replace('/[^0-9.-]/', '', $station->price));
-                $data['discount'] = $data['discount'] ? (double)$data['discount'] : 0;
-                $data['gallons_to_buy'] = $data['gallons_to_buy'] ? (double)$data['gallons_to_buy'] :null;
-                $data['is_optimal'] = $data['is_optimal'] ? (bool)$data['is_optimal'] : false;
-                // Optionally remove the old keys if not needed
-                unset($data['latitude'], $data['longitude'],$data['ifta_tax'],$data['name']);
-            return $data;
-        });
+        //         // Add the new keys
+        //         $data['ftp_lat'] = $data['latitude'];
+        //         $data['ftp_lng'] = $data['longitude'];
+        //         $data['fuel_station_name'] = $data['name'];
+        //         $data['IFTA_tax'] = floatval(preg_replace('/[^0-9.-]/', '', $station->ifta_tax));
+        //         $data['lastprice'] = floatval(preg_replace('/[^0-9.-]/', '', $station->lastprice));
+        //         $data['price'] = floatval(preg_replace('/[^0-9.-]/', '', $station->price));
+        //         $data['discount'] = $data['discount'] ? (double)$data['discount'] : 0;
+        //         $data['gallons_to_buy'] = $data['gallons_to_buy'] ? (double)$data['gallons_to_buy'] :null;
+        //         $data['is_optimal'] = $data['is_optimal'] ? (bool)$data['is_optimal'] : false;
+        //         // Optionally remove the old keys if not needed
+        //         unset($data['latitude'], $data['longitude'],$data['ifta_tax'],$data['name']);
+        //     return $data;
+        // });
         unset($trip->vehicle_id);
         $startLat = $trip->start_lat;
         $startLng = $trip->start_lng;
@@ -1120,8 +1120,7 @@ class TripController extends Controller
         $updatedEndLat =$trip->updated_end_lat;
         $updatedEndLng = $trip->updated_end_lng;
         $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
-        $waypoints = '';
-        $stops = Tripstop::where('trip_id', $trip->id)->get();
+        $stops = Tripstop::where('trip_id', $request->trip_id)->get();
         if ($stops->isNotEmpty()) {
             $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
         }

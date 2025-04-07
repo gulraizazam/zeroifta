@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Tripstop extends Model
 {
     use HasFactory;
-    protected $fillable = ['trip_id', 'stop_name', 'stop_lat', 'stop_lng'];
+    protected $guarded = [];
 }
