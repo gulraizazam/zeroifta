@@ -1322,7 +1322,7 @@ class TripController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'trip_id' => 'required|exists:trips,id',
-            'stop_id' => 'required|exists:tripstops,id',
+            'stop_id' => 'required|array|exists:tripstops,id',
 
         ]);
 
@@ -1335,7 +1335,7 @@ class TripController extends Controller
         }
 
         $stopId = $request->input('stop_id');
-        Tripstop::where('id', $stopId)->delete();
+        Tripstop::whereIn('id', $stopId)->delete();
         $trip = Trip::whereId($request->trip_id)->first();
         $fuelStations = FuelStation::where('trip_id', $request->trip_id)->get()
             ->map(function ($station) {
