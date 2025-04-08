@@ -50,14 +50,14 @@ class IFTAController extends Controller
         $truckMpg = $request->truck_mpg;
         $fuelTankCapacity = $request->fuel_tank_capacity;
         $currentFuel = $request->total_gallons_present;
-        $bearing = $request->bearing ?? 90;
+        //$bearing = $request->bearing ?? 90;
         // Replace with your Google API key
         $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
         $stops = Tripstop::where('trip_id', $request->trip_id)->get();
         if ($stops->isNotEmpty()) {
             $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
         }
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin=heading={$bearing}:{$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
+        $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
         if (isset($waypoints)) {
             $url .= "&waypoints=optimize:true|{$waypoints}";
         }
@@ -70,17 +70,17 @@ class IFTAController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                $stepSize =3; // Sample every 10th point
+                    $stepSize =150; // Sample every 10th point
 
-                foreach ($steps as $step) {
-                    if (isset($step['polyline']['points'])) {
-                        $points = $this->decodePolyline($step['polyline']['points']);
-                        // Sample every 10th point
-                        for ($i = 0; $i < count($points); $i += $stepSize) {
-                            $decodedCoordinates[] = $points[$i];
+                    foreach ($steps as $step) {
+                        if (isset($step['polyline']['points'])) {
+                            $points = $this->decodePolyline($step['polyline']['points']);
+                            // Sample every 10th point
+                            for ($i = 0; $i < count($points); $i += $stepSize) {
+                                $decodedCoordinates[] = $points[$i];
+                            }
                         }
                     }
-                }
                     $polylinePoints = [];
 
                     foreach ($data['routes'][0]['legs'] as $leg) {
@@ -226,14 +226,14 @@ class IFTAController extends Controller
                         $vehicle=null;
                     }
 
-
+                    unset($trip->polyline);
+                    unset($trip->polyline_encoded);
                     // Create a separate key for the polyline
                     $responseData = [
                         'trip_id' => $request->trip_id,
                         'trip' => $trip,
                         'fuel_stations' => $result, // Fuel stations with optimal station marked
-                        'polyline' => $decodedPolyline,
-                        'encoded_polyline'=>$encodedPolyline,
+
                         'polyline_paths' => $polylinePoints ?? [],
                         'stops' => $stops,
                         'vehicle' => $vehicle
@@ -287,7 +287,7 @@ class IFTAController extends Controller
                         'status' => 200,
                         'message' => 'Fuel stations fetched successfully.',
                         'data' => $responseData,
-                    ]);
+                    ],200);
                 }
 
                 return response()->json([
@@ -300,7 +300,7 @@ class IFTAController extends Controller
                     'status' => 500,
                     'message' => 'Failed to fetch data from Google Maps API.',
                     'data'=>(object)[]
-                ]);
+                ],500);
             }
 
         }
@@ -309,7 +309,7 @@ class IFTAController extends Controller
             'status' => 500,
             'message' => 'Failed to fetch data from Google Maps API.',
             'data'=>(object)[]
-        ]);
+        ],500);
     }
 
     public function getDecodedPolyline(Request $request, FcmService $firebaseService)
@@ -332,7 +332,7 @@ class IFTAController extends Controller
         $findTrip = Trip::where('user_id', $validatedData['user_id'])->where('status', 'active')->first();
 
         if ($findTrip) {
-            return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => $findTrip]);
+            return response()->json(['status' => 422, 'message' => 'Trip already exists for this user', 'data' => $findTrip],422);
         }
          // Set trip status to active
         $validatedData['status']='active';
@@ -349,43 +349,43 @@ class IFTAController extends Controller
         $truckMpg = $request->truck_mpg;
         $fuelTankCapacity = $request->fuel_tank_capacity;
         $currentFuel = $request->total_gallons_present;
+
         // Fetch route data from Google Maps API
         $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
         $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$startLat},{$startLng}&destination={$endLat},{$endLng}&key={$apiKey}";
 
         // Fetch data from Google Maps API
         $response = Http::get($url);
-
         if ($response->successful()) {
             $data = $response->json();
-           if($data['routes'] && $data['routes'][0]){
-            if (!empty($data['routes'][0]['legs'][0]['steps'])) {
-                $steps = $data['routes'][0]['legs'][0]['steps'];
-                $decodedCoordinates = [];
-                $stepSize = 7; // Sample every 10th point ...but this approach is not correct
+            if($data['routes'] && $data['routes'][0]){
+                if (!empty($data['routes'][0]['legs'][0]['steps'])) {
+                    $steps = $data['routes'][0]['legs'][0]['steps'];
+                    $decodedCoordinates = [];
+                    $stepSize = 150; // Sample every 10th point ...but this approach is not correct
 
-                foreach ($steps as $step) {
-                    if (isset($step['polyline']['points'])) {
-                        //decode polyline
-                        $points = $this->decodePolyline($step['polyline']['points']);
+                    foreach ($steps as $step) {
+                        if (isset($step['polyline']['points'])) {
+                            //decode polyline
+                            $points = $this->decodePolyline($step['polyline']['points']);
 
-                        for ($i = 0; $i < count($points); $i += $stepSize) {
-                            $decodedCoordinates[] = $points[$i];
+                            for ($i = 0; $i < count($points); $i += $stepSize) {
+                                $decodedCoordinates[] = $points[$i];
+                            }
                         }
                     }
+
+                    // Extract polyline points as an array of strings
+                    $polylinePoints = array_map(function ($step) {
+                        return $step['polyline']['points'] ?? null;
+                    }, $steps);
+
+                    // Filter out any null values if necessary
+                    $polylinePoints = array_filter($polylinePoints);
+
+
                 }
-
-                // Extract polyline points as an array of strings
-                $polylinePoints = array_map(function ($step) {
-                    return $step['polyline']['points'] ?? null;
-                }, $steps);
-
-                // Filter out any null values if necessary
-                $polylinePoints = array_filter($polylinePoints);
-
-
-            }
-            $route = $data['routes'][0];
+                $route = $data['routes'][0];
                 if($route){
                     $totalDistance = 0;
                     $totalDuration = 0;
@@ -412,148 +412,148 @@ class IFTAController extends Controller
                         $formattedDuration = "{$minutes} min";
                     }
                 }
-            if (isset($data['routes'][0]['overview_polyline']['points'])) {
-                $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
-                $decodedPolyline = $this->decodePolyline($encodedPolyline);
+                if (isset($data['routes'][0]['overview_polyline']['points'])) {
+                    $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
+                    $decodedPolyline = $this->decodePolyline($encodedPolyline);
 
-                // Filter coordinates based on distance from start and end points
-                $finalFilteredPolyline = array_filter($decodedPolyline, function ($coordinate) use ($startLat, $startLng, $endLat, $endLng) {
-                    // Ensure $coordinate is valid
-                    if (isset($coordinate['lat'], $coordinate['lng'])) {
-                        // Calculate distances from both start and end points
-                        $distanceFromStart = $this->haversineDistanceFilter($startLat, $startLng, $coordinate['lat'], $coordinate['lng']);
-                        $distanceFromEnd = $this->haversineDistanceFilter($endLat, $endLng, $coordinate['lat'], $coordinate['lng']);
+                    // Filter coordinates based on distance from start and end points
+                    $finalFilteredPolyline = array_filter($decodedPolyline, function ($coordinate) use ($startLat, $startLng, $endLat, $endLng) {
+                        // Ensure $coordinate is valid
+                        if (isset($coordinate['lat'], $coordinate['lng'])) {
+                            // Calculate distances from both start and end points
+                            $distanceFromStart = $this->haversineDistanceFilter($startLat, $startLng, $coordinate['lat'], $coordinate['lng']);
+                            $distanceFromEnd = $this->haversineDistanceFilter($endLat, $endLng, $coordinate['lat'], $coordinate['lng']);
 
-                        // Keep coordinates if they are sufficiently far from both points
-                        return $distanceFromStart > 9 && $distanceFromEnd > 9;
-                    }
-                    return false; // Skip invalid coordinates
-                });
+                            // Keep coordinates if they are sufficiently far from both points
+                            return $distanceFromStart > 9 && $distanceFromEnd > 9;
+                        }
+                        return false; // Skip invalid coordinates
+                    });
 
-                // Reset array keys to ensure a clean array structure
-                $finalFilteredPolyline = array_values($finalFilteredPolyline);
-                $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
-                //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
-                $reserve_fuel = $request->reserve_fuel;
-                 $totalFuel = $currentFuel+$reserve_fuel;
-                $tripDetailResponse = [
-                    'data' => [
-                        'trip' => [
-                            'start' => [
-                                'latitude' => $startLat,
-                                'longitude' => $startLng
+                    // Reset array keys to ensure a clean array structure
+                    $finalFilteredPolyline = array_values($finalFilteredPolyline);
+                    $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
+                    //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
+                    $reserve_fuel = $request->reserve_fuel;
+                    $totalFuel = $currentFuel+$reserve_fuel;
+                    $tripDetailResponse = [
+                        'data' => [
+                            'trip' => [
+                                'start' => [
+                                    'latitude' => $startLat,
+                                    'longitude' => $startLng
+                                ],
+                                'end' => [
+                                    'latitude' => $endLat,
+                                    'longitude' => $endLng
+                                ]
                             ],
-                            'end' => [
-                                'latitude' => $endLat,
-                                'longitude' => $endLng
-                            ]
-                        ],
-                        'vehicle' => [
-                            'mpg' => $truckMpg,
-                            'fuelLeft' => $totalFuel
-                        ],
-                        'fuelStations' => $matchingRecords,
-                        'polyline'=>$decodedCoordinates
+                            'vehicle' => [
+                                'mpg' => $truckMpg,
+                                'fuelLeft' => $totalFuel
+                            ],
+                            'fuelStations' => $matchingRecords,
+                            'polyline'=>$decodedCoordinates
 
-                    ]
-                ];
-                // Find optimum fuel stations
-                $result = $this->markOptimumFuelStations($tripDetailResponse);
-                if($result==false){
-                    $result = $matchingRecords;
-
-                }
-                // Create a new trip record
-               $startLocation = $this->getAddressFromCoordinates($request->start_lat, $request->start_lng);
-               $endLocation = $this->getAddressFromCoordinates($request->end_lat, $request->end_lng);
-
-                $fuelStations = [];
-                $validatedData['updated_start_lat'] = $request->start_lat;
-                $validatedData['updated_start_lng'] = $request->start_lng;
-                $validatedData['updated_end_lat'] = $request->end_lat;
-                $validatedData['updated_end_lng'] = $request->end_lng;
-                $validatedData['polyline'] = json_encode($polylinePoints);
-                $validatedData['polyline_encoded'] = $encodedPolyline;
-                $validatedData['distance'] = $formattedDistance;
-                $validatedData['duration'] = $formattedDuration;
-                $validatedData['start_address'] = $startLocation['full_address'];
-                $validatedData['end_address'] = $endLocation['full_address'];
-                $validatedData['start_city'] = $startLocation['city'];
-                $validatedData['start_state'] = $startLocation['state'];
-                $validatedData['end_city'] = $startLocation['city'];
-                $validatedData['end_state'] = $startLocation['state'];
-
-                $trip = Trip::create($validatedData);
-               foreach ($result as  $value) {
-                    // Prepare fuel station data for processing
-                    $fuelStations[] = [
-                        'name' => $value['fuel_station_name'],
-                        'latitude' => $value['ftpLat'],
-                        'longitude' => $value['ftpLng'],
-                        'price' => $value['price'],
-                        'lastprice' => $value['lastprice'],
-                        'discount' => $value['discount'],
-                        'ifta_tax' => $value['IFTA_tax'],
-                        'is_optimal' => $value['isOptimal'] ?? false,
-                        'address' => $value['address'] ?? 'N/A',
-                        'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
-                        'trip_id' => $trip->id,
-                        'user_id' => $validatedData['user_id'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        ]
                     ];
-               }
-               // Dispatch background process
-               ProcessTripStart::dispatch($fuelStations, $trip, $validatedData);
-                $trip->distance = $formattedDistance;
-                $trip->duration = $formattedDuration;
-                $trip->user_id = (int)$trip->user_id;
-                $vehicleFind = DriverVehicle::where('driver_id', $trip->user_id)->pluck('vehicle_id')->first();
-                if($vehicleFind){
-                    // Update vehicle details
-                    $vehicle = Vehicle::where('id', $vehicleFind)->first();
-                    $vehicle->fuel_left= $currentFuel;
-                    $vehicle->mpg=$truckMpg;
-                    $vehicle->reserve_fuel=$request->reserve_fuel;
-                    $vehicle->update();
-                    if($vehicle && $vehicle->vehicle_image != null){
-                        $vehicle->vehicle_image =url('/vehicles/'.$vehicle->vehicle_image);
+                    // Find optimum fuel stations
+                    $result = $this->markOptimumFuelStations($tripDetailResponse);
+                    if($result==false){
+                        $result = $matchingRecords;
+
                     }
-                }else{
-                    $vehicle = null;
+                    // Create a new trip record
+                    $startLocation = $this->getAddressFromCoordinates($request->start_lat, $request->start_lng);
+                    $endLocation = $this->getAddressFromCoordinates($request->end_lat, $request->end_lng);
+
+                    $fuelStations = [];
+                    $validatedData['updated_start_lat'] = $request->start_lat;
+                    $validatedData['updated_start_lng'] = $request->start_lng;
+                    $validatedData['updated_end_lat'] = $request->end_lat;
+                    $validatedData['updated_end_lng'] = $request->end_lng;
+                    $validatedData['polyline'] = json_encode($polylinePoints);
+                    $validatedData['polyline_encoded'] = $encodedPolyline;
+                    $validatedData['distance'] = $formattedDistance;
+                    $validatedData['duration'] = $formattedDuration;
+                    $validatedData['start_address'] = $startLocation['full_address'];
+                    $validatedData['end_address'] = $endLocation['full_address'];
+                    $validatedData['start_city'] = $startLocation['city'];
+                    $validatedData['start_state'] = $startLocation['state'];
+                    $validatedData['end_city'] = $startLocation['city'];
+                    $validatedData['end_state'] = $startLocation['state'];
+
+                    $trip = Trip::create($validatedData);
+                    foreach ($result as  $value) {
+                            // Prepare fuel station data for processing
+                            $fuelStations[] = [
+                                'name' => $value['fuel_station_name'],
+                                'latitude' => $value['ftpLat'],
+                                'longitude' => $value['ftpLng'],
+                                'price' => $value['price'],
+                                'lastprice' => $value['lastprice'],
+                                'discount' => $value['discount'],
+                                'ifta_tax' => $value['IFTA_tax'],
+                                'is_optimal' => $value['isOptimal'] ?? false,
+                                'address' => $value['address'] ?? 'N/A',
+                                'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
+                                'trip_id' => $trip->id,
+                                'user_id' => $validatedData['user_id'],
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                    }
+                    // Dispatch background process
+                    ProcessTripStart::dispatch($fuelStations, $trip, $validatedData);
+                    $trip->distance = $formattedDistance;
+                    $trip->duration = $formattedDuration;
+                    $trip->user_id = (int)$trip->user_id;
+                    $vehicleFind = DriverVehicle::where('driver_id', $trip->user_id)->pluck('vehicle_id')->first();
+                    if($vehicleFind){
+                        // Update vehicle details
+                        $vehicle = Vehicle::where('id', $vehicleFind)->first();
+                        $vehicle->fuel_left= $currentFuel;
+                        $vehicle->mpg=$truckMpg;
+                        $vehicle->reserve_fuel=$request->reserve_fuel;
+                        $vehicle->update();
+                        if($vehicle && $vehicle->vehicle_image != null){
+                            $vehicle->vehicle_image =url('/vehicles/'.$vehicle->vehicle_image);
+                        }
+                    }else{
+                        $vehicle = null;
+                    }
+                    unset($trip->polyline);
+                    unset($trip->polyline_encoded);
+                    $responseData = [
+                        'trip_id'=>$trip->id,
+                        'trip' => $trip,
+                        'fuel_stations' => $result,
+
+
+                        'polyline_paths'=>$polylinePoints ?? [],
+                        'stops'=>[],
+                        'vehicle' => $vehicle
+                    ];
+
+                    return response()->json([
+                        'status' => 200,
+                        'message' => 'Fuel stations fetched successfully.',
+                        'data' => $responseData,
+                    ],200);
                 }
-
-                $responseData = [
-                    'trip_id'=>$trip->id,
-                    'trip' => $trip,
-                    'fuel_stations' => $result,
-                    'polyline' => $decodedPolyline,
-                    'encoded_polyline'=>$encodedPolyline,
-                    'polyline_paths'=>$polylinePoints ?? [],
-                    'stops'=>[],
-                    'vehicle' => $vehicle
-                ];
-
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Fuel stations fetched successfully.',
-                    'data' => $responseData,
-                ]);
             }
-
-
-           }else{
-            return response()->json([
-                'status' => 500,
-                'message' => 'Failed to fetch data from Google Maps API.',
-                'data'=>(object)[]
-            ]);
-           }
+            else{
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Failed to fetch data from Google Maps API.',
+                    'data'=>(object)[]
+                ],500);
+            }
 
         }
 
         return response()->json([
-            'status' => false,
+            'status' => 500,
             'message' => 'Failed to fetch polyline.',
         ], 500);
     }

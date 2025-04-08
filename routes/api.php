@@ -85,6 +85,8 @@ Route::post('dashboard',[DriverDashboardController::class,'index']);
 
     Route::post('stops/add',[TripController::class,'storeStop']);
 
+    Route::post('stops/remove',[TripController::class,'removeStop']);
+
     ///
     Route::post('/payment-methods', [PaymentMethodController::class, 'allPaymentMethod']);
 
