@@ -1322,7 +1322,7 @@ class TripController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'trip_id' => 'required|exists:trips,id',
-            'stop_id' => 'required|exists:tripstops,id',
+            'stop_id' => 'required|array|exists:tripstops,id',
 
         ]);
 
@@ -1335,9 +1335,9 @@ class TripController extends Controller
         }
 
         $stopId = $request->input('stop_id');
-        Tripstop::where('id', $stopId)->delete();
+        Tripstop::whereIn('id', $stopId)->delete();
         $trip = Trip::whereId($request->trip_id)->first();
-       
+
         unset($trip->vehicle_id);
         $startLat = $trip->start_lat;
         $startLng = $trip->start_lng;
@@ -1358,10 +1358,10 @@ class TripController extends Controller
             $url .= "&waypoints=optimize:true|{$waypoints}";
         }
         $response = Http::get($url);
-        
+
         if ($response->successful()) {
             $data = $response->json();
-            
+
             if($data['routes'] && $data['routes'][0]){
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
