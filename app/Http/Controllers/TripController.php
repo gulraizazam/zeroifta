@@ -1121,18 +1121,7 @@ class TripController extends Controller
         }
 
         // Save stops
-        $stopsData = array_map(function ($stop) use ($request) {
-            return [
-                'trip_id' => $request->trip_id,
-                'stop_name' => $stop['stop_name'] ?? null,
-                'stop_lat' => $stop['stop_lat'],
-                'stop_lng' => $stop['stop_lng'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }, $request->stops);
-
-
+       
         $trip = Trip::whereId($request->trip_id)->first();
 
         unset($trip->vehicle_id);
