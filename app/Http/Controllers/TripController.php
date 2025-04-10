@@ -1286,6 +1286,7 @@ class TripController extends Controller
                     //$result = $this->findOptimalFuelStation($startLat, $startLng, $truckMpg, $currentFuel, $matchingRecords, $endLat, $endLng);
                     FuelStation::where('trip_id', $trip->id)->delete();
                     foreach ($result as  $value) {
+                        dd($value);
                         $fuelStations[] = [
                             'name' => $value['fuel_station_name'] ??'N/A',
                             'latitude' => $value['ftpLat'] ?? 0,
