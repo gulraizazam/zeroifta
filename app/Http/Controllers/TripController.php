@@ -1717,7 +1717,6 @@ class TripController extends Controller
         $endLng = $tripDetailResponse['data']['trip']['end']['longitude'] ?? null;
         $start = $tripDetailResponse['data']['trip']['start'] ?? null;
         $fuelStations = collect($tripDetailResponse['data']['fuelStations']);
-
         $optimalStation = $fuelStations->firstWhere('isOptimal', true);
 
         // Calculate truck's travelable distance
@@ -1730,13 +1729,12 @@ class TripController extends Controller
         $polyline = $tripDetailResponse['data']['polyline'];
         // Add distanceFromStart to every fuel station
         $fuelStations = $fuelStations->map(function ($fuelStation) use ($start,$polyline) {
-           
             if ($start) {
                 $fuelStation['distanceFromStart'] = $this->getDistance($start, $fuelStation,$polyline);
             }
             return $fuelStation;
         });
-       
+
         // Also, add distanceFromStart to the optimal station if it exists
         if ($optimalStation && $start) {
             $optimalStation['distanceFromStart'] = $this->getDistance($start, $optimalStation,$polyline);
