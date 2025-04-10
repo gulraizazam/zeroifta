@@ -1163,7 +1163,7 @@ class TripController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                    $stepSize = 150; // Sample every 10th point
+                    $stepSize = 1; // Sample every 10th point
 
                     foreach ($steps as $step) {
                         if (isset($step['polyline']['points'])) {
@@ -1231,7 +1231,7 @@ class TripController extends Controller
 
                     // Reset array keys to ensure a clean array structure
                     $finalFilteredPolyline = array_values($finalFilteredPolyline);
-                    $matchingRecords = $this->loadAndParseFTPData($decodedCoordinates);
+                    $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
                     //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
