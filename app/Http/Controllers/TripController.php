@@ -1169,10 +1169,11 @@ class TripController extends Controller
 
         if ($response->successful()) {
             $data = $response->json();
-            dd($data);
+           
             if($data['routes'] && $data['routes'][0]){
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
+                    dd($steps);
                     $decodedCoordinates = [];
                     $stepSize = 150; // Sample every 10th point
 
