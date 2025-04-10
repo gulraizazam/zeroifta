@@ -1186,7 +1186,7 @@ class TripController extends Controller
                             }
                         }
                     }
-                    dd($decodedCoordinates);
+                   
                     $polylinePoints = [];
 
                     foreach ($data['routes'][0]['legs'] as $leg) {
@@ -1245,6 +1245,7 @@ class TripController extends Controller
                     // Reset array keys to ensure a clean array structure
                     $finalFilteredPolyline = array_values($finalFilteredPolyline);
                     $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
+                    dd($matchingRecords);
                     //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
