@@ -874,7 +874,7 @@ class TripController extends Controller
                 ]
             ];
             $fuelStations = FuelStation::where('trip_id', $trip->id)->get()->map(function ($station) {
-                return [
+                $response = [
                     "fuel_station_name" => $station->name,
                     "ftpLat" => $station->latitude,
                     "ftpLng" => $station->longitude,
@@ -886,6 +886,22 @@ class TripController extends Controller
                     "distanceFromStart" => (float) number_format($station->distanceFromStart, 6, '.', ''), // Ensure 6 decimal places
                     "gallons_to_buy" => $station->gallons_to_buy,
                 ];
+
+                // Conditionally add optimal fields only if their value is 1
+                if ($station->firstOptimal == 1) {
+                    $response["firstOptimal"] = 1;
+                }
+                if ($station->secondOptimal == 1) {
+                    $response["secondOptimal"] = 1;
+                }
+                if ($station->midOptimal == 1) {
+                    $response["midOptimal"] = 1;
+                }
+                if ($station->is_optimal == 1) {
+                    $response["isOptimal"] = 1;
+                }
+
+                return $response;
             });
             //$result = $this->markOptimumFuelStations($tripDetailResponse);
             // if($result==false){
