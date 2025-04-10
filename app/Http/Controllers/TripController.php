@@ -881,7 +881,7 @@ class TripController extends Controller
                     "lastprice" => $station->lastprice,
                     "price" => $station->price,
                     "discount" => $station->discount,
-                    "IFTA_tax" => $station->IFTA_tax,
+                    "IFTA_tax" => $station->ifta_tax,
                     "address" => $station->address,
                     "distanceFromStart" => (float) number_format($station->distanceFromStart, 6, '.', ''), // Ensure 6 decimal places
                     "gallons_to_buy" => $station->gallons_to_buy,
