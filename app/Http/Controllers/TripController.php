@@ -1153,9 +1153,9 @@ class TripController extends Controller
             $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
         }
         $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
-        if ($waypoints) {
-            $url .= "&waypoints=optimize:true|{$waypoints}";
-        }
+        // if ($waypoints) {
+        //     $url .= "&waypoints=optimize:true|{$waypoints}";
+        // }
         $response = Http::get($url);
 
         if ($response->successful()) {
@@ -1332,7 +1332,6 @@ class TripController extends Controller
                 'trip_id' => $trip->id,
                 'trip' => $trip,
                 'fuel_stations' => $result ?? [],
-
                 'polyline_paths' => $polylinePoints ?? [],
                 'stops' => $stops,
                 'vehicle' => $vehicle
