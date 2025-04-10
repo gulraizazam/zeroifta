@@ -872,37 +872,37 @@ class TripController extends Controller
 
                 ]
             ];
-
-            $result = $this->markOptimumFuelStations($tripDetailResponse);
-            if($result==false){
-                $result = $matchingRecords;
-            }
-            $insertData = [];
-            FuelStation::where('trip_id', $trip->id)->delete();
-            foreach ($result as  $value) {
-                $fuelStations[] = [
-                    'name' => $value['fuel_station_name'] ??'N/A',
-                    'latitude' => $value['ftpLat'] ?? 0,
-                    'longitude' => $value['ftpLng'] ?? 0,
-                    'price' => $value['price'] ?? 0,
-                    'lastprice' => $value['lastprice'] ?? 0,
-                    'discount' => $value['discount'] ?? 0,
-                    'ifta_tax' => $value['IFTA_tax'] ?? 0,
-                    'is_optimal' => $value['isOptimal'] ?? false,
-                    'firstOptimal' => $value['firstOptimal'] ?? false,
-                    'midOptimal' => $value['midOptimal'] ?? false,
-                    'secondOptimal' => $value['secondOptimal'] ?? false,
-                    'address' => $value['address'] ?? 'N/A',
-                    'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
-                    'trip_id' => $trip->id,
-                    'user_id' => $trip->user_id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
-            if(!empty($fuelStations)){
-                FuelStation::insert($fuelStations);
-            }
+            $fuelStations = FuelStation::where('trip_id', $trip->id)->get();
+            //$result = $this->markOptimumFuelStations($tripDetailResponse);
+            // if($result==false){
+            //     $result = $matchingRecords;
+            // }
+            // $insertData = [];
+            // FuelStation::where('trip_id', $trip->id)->delete();
+            // foreach ($result as  $value) {
+            //     $fuelStations[] = [
+            //         'name' => $value['fuel_station_name'] ??'N/A',
+            //         'latitude' => $value['ftpLat'] ?? 0,
+            //         'longitude' => $value['ftpLng'] ?? 0,
+            //         'price' => $value['price'] ?? 0,
+            //         'lastprice' => $value['lastprice'] ?? 0,
+            //         'discount' => $value['discount'] ?? 0,
+            //         'ifta_tax' => $value['IFTA_tax'] ?? 0,
+            //         'is_optimal' => $value['isOptimal'] ?? false,
+            //         'firstOptimal' => $value['firstOptimal'] ?? false,
+            //         'midOptimal' => $value['midOptimal'] ?? false,
+            //         'secondOptimal' => $value['secondOptimal'] ?? false,
+            //         'address' => $value['address'] ?? 'N/A',
+            //         'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
+            //         'trip_id' => $trip->id,
+            //         'user_id' => $trip->user_id,
+            //         'created_at' => now(),
+            //         'updated_at' => now(),
+            //     ];
+            // }
+            // if(!empty($fuelStations)){
+            //     FuelStation::insert($fuelStations);
+            // }
 
 
         }else{
@@ -930,7 +930,7 @@ class TripController extends Controller
             $response = [
                 'trip_id' => $trip->id,
                 'trip' => $trip,
-                'fuel_stations' => $result,
+                'fuel_stations' => $fuelStations,
 
                 'polyline_paths'=>$polylinePoints,
                 'stops' => $stops,
