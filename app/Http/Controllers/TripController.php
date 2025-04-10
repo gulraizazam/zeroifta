@@ -1149,13 +1149,22 @@ class TripController extends Controller
        
         $waypoints = '';
         $stops = Tripstop::where('trip_id', $trip->id)->get();
+        
         if ($stops->isNotEmpty()) {
-            $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
+            $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")
+                               ->implode('|');
+            $waypoints = urlencode($waypoints); // Safely encode for URL
         }
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
-        // if ($waypoints) {
-        //     $url .= "&waypoints=optimize:true|{$waypoints}";
-        // }
+        
+        $url = "https://maps.googleapis.com/maps/api/directions/json?" . http_build_query([
+            'origin' => "{$updatedStartLat},{$updatedStartLng}",
+            'destination' => "{$updatedEndLat},{$updatedEndLng}",
+            'key' => $apiKey,
+        ]);
+        
+        if ($waypoints) {
+            $url .= "&waypoints=optimize:true|{$waypoints}";
+        }
         $response = Http::get($url);
 
         if ($response->successful()) {
