@@ -2160,7 +2160,7 @@ class TripController extends Controller
 
     public function getDistance($start, $fuelStation, $polyline)
     {
-
+dd($start,$fuelStation,$polyline);
         $userLocation = ['lat' => $start['latitude'], 'lng' => $start['longitude']];
         $stationLocation = ['lat' => $fuelStation['ftpLat'], 'lng' => $fuelStation['ftpLng']];
 
