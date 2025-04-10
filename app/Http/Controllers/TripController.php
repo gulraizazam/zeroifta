@@ -1174,11 +1174,14 @@ class TripController extends Controller
                             }
                         }
                     }
-                    $polylinePoints = array_map(function ($step) {
-                        return $step['polyline']['points'] ?? null;
-                    }, $steps);
+                    $polylinePoints = [];
 
-                    // Filter out any null values if necessary
+                    foreach ($data['routes'][0]['legs'] as $leg) {
+                        foreach ($leg['steps'] as $step) {
+                            $polylinePoints[] = $step['polyline']['points'] ?? null;
+                        }
+                    }
+
                     $polylinePoints = array_filter($polylinePoints);
                    // $completePolyline = implode('', $polylinePoints);
                 }
