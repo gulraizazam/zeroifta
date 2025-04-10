@@ -1177,7 +1177,7 @@ class TripController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                    $stepSize = 150; // Sample every 10th point
+                    $stepSize =150; // Sample every 10th point
 
                     foreach ($steps as $step) {
                         if (isset($step['polyline']['points'])) {
@@ -1191,13 +1191,17 @@ class TripController extends Controller
                     $polylinePoints = [];
 
                     foreach ($data['routes'][0]['legs'] as $leg) {
-                        foreach ($leg['steps'] as $step) {
-                            $polylinePoints[] = $step['polyline']['points'] ?? null;
+                        if (!empty($leg['steps'])) {
+                            foreach ($leg['steps'] as $step) {
+                                if (isset($step['polyline']['points'])) {
+                                    $polylinePoints[] = $step['polyline']['points'];
+                                }
+                            }
                         }
                     }
 
+                    // Filter out any null values if necessary
                     $polylinePoints = array_filter($polylinePoints);
-                   // $completePolyline = implode('', $polylinePoints);
                 }
                 $route = $data['routes'][0] ?? null;
                 if ($route) {
@@ -1726,6 +1730,7 @@ class TripController extends Controller
         $polyline = $tripDetailResponse['data']['polyline'];
         // Add distanceFromStart to every fuel station
         $fuelStations = $fuelStations->map(function ($fuelStation) use ($start,$polyline) {
+            dd($fuelStation, $start);
             if ($start) {
                 $fuelStation['distanceFromStart'] = $this->getDistance($start, $fuelStation,$polyline);
             }
