@@ -1730,13 +1730,13 @@ class TripController extends Controller
         $polyline = $tripDetailResponse['data']['polyline'];
         // Add distanceFromStart to every fuel station
         $fuelStations = $fuelStations->map(function ($fuelStation) use ($start,$polyline) {
-            dd($fuelStation, $start);
+           
             if ($start) {
                 $fuelStation['distanceFromStart'] = $this->getDistance($start, $fuelStation,$polyline);
             }
             return $fuelStation;
         });
-
+        dd($fuelStations);
         // Also, add distanceFromStart to the optimal station if it exists
         if ($optimalStation && $start) {
             $optimalStation['distanceFromStart'] = $this->getDistance($start, $optimalStation,$polyline);
