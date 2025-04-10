@@ -1719,9 +1719,11 @@ class TripController extends Controller
         }
         $polyline = $tripDetailResponse['data']['polyline'];
         // Add distanceFromStart to every fuel station
-        $fuelStations = $fuelStations->filter(function ($station) use ($polyline) {
-            $stationLocation = ['lat' => $station['ftpLat'], 'lng' => $station['ftpLng']];
-            return $this->findNearestPoint($stationLocation, $polyline) !== -1;
+        $fuelStations = $fuelStations->map(function ($fuelStation) use ($start,$polyline) {
+            if ($start) {
+                $fuelStation['distanceFromStart'] = $this->getDistance($start, $fuelStation,$polyline);
+            }
+            return $fuelStation;
         });
 dd($fuelStations);
         // Also, add distanceFromStart to the optimal station if it exists
@@ -2155,32 +2157,22 @@ dd($fuelStations);
     }
 
 
-    private function calculatePolylineDistance($userLocation, $destination, $polyline)
-    {
-        $startIndex = $this->findNearestPoint($userLocation, $polyline);
-        $endIndex = $this->findNearestPoint($destination, $polyline);
-    
-        // If either point is too far from the route, return null
-        if ($startIndex === -1 || $endIndex === -1) {
-            return null;
-        }
-    
-        // Ensure we're moving forward along the polyline
-        if ($startIndex > $endIndex) {
-            [$startIndex, $endIndex] = [$endIndex, $startIndex];
-        }
-    
-        $totalDistance = 0.0;
-        for ($i = $startIndex; $i < $endIndex; $i++) {
-            $totalDistance += $this->haversineDistance1($polyline[$i], $polyline[$i + 1]);
-        }
-        return $totalDistance;
+private function calculatePolylineDistance($userLocation, $destination, $polyline)
+{
+   // dd($polyline, $userLocation, $destination);
+    $startIndex = $this->findNearestPoint($userLocation, $polyline);
+    $endIndex = $this->findNearestPoint($destination, $polyline);
+
+    $totalDistance = 0.0;
+    for ($i = $startIndex; $i < $endIndex; $i++) {
+        $totalDistance += $this->haversineDistance1($polyline[$i], $polyline[$i + 1]);
     }
+    return $totalDistance;
+}
 private function findNearestPoint($location, $polyline)
 {
     $minDistance = PHP_FLOAT_MAX;
-    $nearestIndex = -1; // Default: invalid
-    $maxAllowedDistance = 50; // Miles (adjust as needed)
+    $nearestIndex = 0;
 
     foreach ($polyline as $index => $point) {
         $distance = $this->haversineDistance1($location, $point);
@@ -2189,9 +2181,7 @@ private function findNearestPoint($location, $polyline)
             $nearestIndex = $index;
         }
     }
-
-    // If the nearest point is too far, return -1 (invalid)
-    return ($minDistance <= $maxAllowedDistance) ? $nearestIndex : -1;
+    return $nearestIndex;
 }
 private function haversineDistance1($p1, $p2)
 {
