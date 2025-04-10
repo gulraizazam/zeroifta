@@ -1283,7 +1283,7 @@ class TripController extends Controller
                 if($result==false){
                     $result = $matchingRecords;
                 }
-                dd($result);
+                
                     //$result = $this->findOptimalFuelStation($startLat, $startLng, $truckMpg, $currentFuel, $matchingRecords, $endLat, $endLng);
                     FuelStation::where('trip_id', $trip->id)->delete();
                     foreach ($result as  $value) {
