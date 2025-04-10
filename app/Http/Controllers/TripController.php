@@ -1725,7 +1725,7 @@ class TripController extends Controller
             }
             return $fuelStation;
         });
-dd($fuelStations);
+
         // Also, add distanceFromStart to the optimal station if it exists
         if ($optimalStation && $start) {
             $optimalStation['distanceFromStart'] = $this->getDistance($start, $optimalStation,$polyline);
