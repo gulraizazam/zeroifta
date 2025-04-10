@@ -269,6 +269,7 @@ class TripController extends Controller
                             'firstOptimal' => $value['firstOptimal'] ?? false,
                             'midOptimal' => $value['midOptimal'] ?? false,
                             'secondOptimal' => $value['secondOptimal'] ?? false,
+                            'distanceFromStart' => $value['distanceFromStart'],
                             'address' => $value['address'] ?? 'N/A',
                             'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
                             'trip_id' => $trip->id,
@@ -872,7 +873,20 @@ class TripController extends Controller
 
                 ]
             ];
-            $fuelStations = FuelStation::where('trip_id', $trip->id)->get();
+            $fuelStations = FuelStation::where('trip_id', $trip->id)->get()->map(function ($station) {
+                return [
+                    "fuel_station_name" => $station->fuel_station_name,
+                    "ftpLat" => $station->ftpLat,
+                    "ftpLng" => $station->ftpLng,
+                    "lastprice" => $station->lastprice,
+                    "price" => $station->price,
+                    "discount" => $station->discount,
+                    "IFTA_tax" => $station->IFTA_tax,
+                    "address" => $station->address,
+                    "distanceFromStart" => (float) number_format($station->distanceFromStart, 6, '.', ''), // Ensure 6 decimal places
+                    "gallons_to_buy" => $station->gallons_to_buy,
+                ];
+            });
             //$result = $this->markOptimumFuelStations($tripDetailResponse);
             // if($result==false){
             //     $result = $matchingRecords;
@@ -1269,6 +1283,7 @@ class TripController extends Controller
                             'midOptimal' => $value['midOptimal'] ?? false,
                             'secondOptimal' => $value['secondOptimal'] ?? false,
                             'address' => $value['address'] ?? 'N/A',
+                            'distanceFromStart' => $value['distanceFromStart'],
                             'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
                             'trip_id' => $trip->id,
                             'user_id' => $trip->user_id,
@@ -1496,6 +1511,7 @@ class TripController extends Controller
                             'firstOptimal' => $value['firstOptimal'] ?? false,
                             'midOptimal' => $value['midOptimal'] ?? false,
                             'secondOptimal' => $value['secondOptimal'] ?? false,
+                            'distanceFromStart' => $value['distanceFromStart'],
                             'address' => $value['address'] ?? 'N/A',
                             'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
                             'trip_id' => $trip->id,
