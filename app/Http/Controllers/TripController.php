@@ -875,9 +875,9 @@ class TripController extends Controller
             ];
             $fuelStations = FuelStation::where('trip_id', $trip->id)->get()->map(function ($station) {
                 return [
-                    "fuel_station_name" => $station->fuel_station_name,
-                    "ftpLat" => $station->ftpLat,
-                    "ftpLng" => $station->ftpLng,
+                    "fuel_station_name" => $station->name,
+                    "ftpLat" => $station->latitude,
+                    "ftpLng" => $station->longitude,
                     "lastprice" => $station->lastprice,
                     "price" => $station->price,
                     "discount" => $station->discount,
