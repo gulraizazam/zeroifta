@@ -2166,7 +2166,21 @@ class TripController extends Controller
 
         return $this->calculatePolylineDistance($userLocation, $stationLocation, $polyline);
     }
-    private function findNearestPoint($location, $polyline)
+
+
+private function calculatePolylineDistance($userLocation, $destination, $polyline)
+{
+    dd($polyline, $userLocation, $destination);
+    $startIndex = $this->findNearestPoint($userLocation, $polyline);
+    $endIndex = $this->findNearestPoint($destination, $polyline);
+
+    $totalDistance = 0.0;
+    for ($i = $startIndex; $i < $endIndex; $i++) {
+        $totalDistance += $this->haversineDistance1($polyline[$i], $polyline[$i + 1]);
+    }
+    return $totalDistance;
+}
+private function findNearestPoint($location, $polyline)
 {
     $minDistance = PHP_FLOAT_MAX;
     $nearestIndex = 0;
@@ -2179,18 +2193,6 @@ class TripController extends Controller
         }
     }
     return $nearestIndex;
-}
-
-private function calculatePolylineDistance($userLocation, $destination, $polyline)
-{
-    $startIndex = $this->findNearestPoint($userLocation, $polyline);
-    $endIndex = $this->findNearestPoint($destination, $polyline);
-
-    $totalDistance = 0.0;
-    for ($i = $startIndex; $i < $endIndex; $i++) {
-        $totalDistance += $this->haversineDistance1($polyline[$i], $polyline[$i + 1]);
-    }
-    return $totalDistance;
 }
 private function haversineDistance1($p1, $p2)
 {
