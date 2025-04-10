@@ -2172,7 +2172,8 @@ private function calculatePolylineDistance($userLocation, $destination, $polylin
 private function findNearestPoint($location, $polyline)
 {
     $minDistance = PHP_FLOAT_MAX;
-    $nearestIndex = 0;
+    $nearestIndex = -1; // Default: invalid
+    $maxAllowedDistance = 50; // Miles (adjust as needed)
 
     foreach ($polyline as $index => $point) {
         $distance = $this->haversineDistance1($location, $point);
@@ -2181,7 +2182,9 @@ private function findNearestPoint($location, $polyline)
             $nearestIndex = $index;
         }
     }
-    return $nearestIndex;
+
+    // If the nearest point is too far, return -1 (invalid)
+    return ($minDistance <= $maxAllowedDistance) ? $nearestIndex : -1;
 }
 private function haversineDistance1($p1, $p2)
 {
