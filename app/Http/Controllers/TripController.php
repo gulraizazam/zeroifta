@@ -1147,6 +1147,8 @@ class TripController extends Controller
         }, $request->stops);
         Tripstop::insert($stopsData);
         $stops = Tripstop::where('trip_id', $request->trip_id)->get();
+        $waypoints = '';
+        $stops = Tripstop::where('trip_id', $trip->id)->get();
         if ($stops->isNotEmpty()) {
             $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")->implode('|');
         }
