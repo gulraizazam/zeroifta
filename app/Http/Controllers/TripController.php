@@ -889,16 +889,16 @@ class TripController extends Controller
 
                 // Conditionally add optimal fields only if their value is 1
                 if ($station->firstOptimal == 1) {
-                    $response["firstOptimal"] = 1;
+                    $response["firstOptimal"] =true;
                 }
                 if ($station->secondOptimal == 1) {
-                    $response["secondOptimal"] = 1;
+                    $response["secondOptimal"] = true;
                 }
                 if ($station->midOptimal == 1) {
-                    $response["midOptimal"] = 1;
+                    $response["midOptimal"] = true;
                 }
                 if ($station->is_optimal == 1) {
-                    $response["isOptimal"] = 1;
+                    $response["isOptimal"] = true;
                 }
 
                 return $response;
