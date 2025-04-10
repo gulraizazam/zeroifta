@@ -1163,7 +1163,7 @@ class TripController extends Controller
         }
         $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$updatedStartLat},{$updatedStartLng}&destination={$updatedEndLat},{$updatedEndLng}&key={$apiKey}";
         if (isset($waypoints)) {
-            $url .= "&waypoints=optimize:true|{$waypoints}";
+            $url .= "&waypoints={$waypoints}";
         }
 
         // Build the Google Maps API URL
