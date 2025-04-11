@@ -1229,7 +1229,7 @@ class TripController extends Controller
                     $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
                     $decodedPolyline = $this->decodePolyline($encodedPolyline);
                     // Filter coordinates based on distance from start and end points
-                    $finalFilteredPolyline = array_filter($$decodedCoordinates, function ($coordinate) use ($updatedStartLat, $updatedStartLng, $updatedEndLat, $updatedEndLng) {
+                    $finalFilteredPolyline = array_filter($decodedCoordinates, function ($coordinate) use ($updatedStartLat, $updatedStartLng, $updatedEndLat, $updatedEndLng) {
                         // Ensure $coordinate is valid
                         if (isset($coordinate['lat'], $coordinate['lng'])) {
                             // Calculate distances from both start and end points
