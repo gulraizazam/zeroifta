@@ -971,15 +971,11 @@ class TripController extends Controller
             return response()->json(['status'=>404,'message'=>'trip not found','data'=>(object)[]],404);
         }
     }
-    private function decodePolyline($encoded)
-    {
+    function decodePolyline($encoded) {
         $points = [];
-        $index = 0;
-        $len = strlen($encoded);
-        $lat = 0;
-        $lng = 0;
+        $index = $lat = $lng = 0;
 
-        while ($index < $len) {
+        while ($index < strlen($encoded)) {
             $b = 0;
             $shift = 0;
             $result = 0;
@@ -993,9 +989,7 @@ class TripController extends Controller
             $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
             $lat += $dlat;
 
-            $shift = 0;
-            $result = 0;
-
+            $shift = $result = 0;
             do {
                 $b = ord($encoded[$index++]) - 63;
                 $result |= ($b & 0x1f) << $shift;
@@ -1005,10 +999,7 @@ class TripController extends Controller
             $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
             $lng += $dlng;
 
-            $points[] = [
-                'lat' => number_format($lat * 1e-5, 5),
-                'lng' => number_format($lng * 1e-5, 5),
-            ];
+            $points[] = ['lat' => $lat / 1e5, 'lng' => $lng / 1e5];
         }
 
         return $points;
@@ -1121,7 +1112,7 @@ class TripController extends Controller
         }
 
         // Save stops
-       
+
         $trip = Trip::whereId($request->trip_id)->first();
 
         unset($trip->vehicle_id);
@@ -1146,22 +1137,22 @@ class TripController extends Controller
             ];
         }, $request->stops);
         Tripstop::insert($stopsData);
-       
+
         $waypoints = '';
         $stops = Tripstop::where('trip_id', $trip->id)->get();
-        
+
         if ($stops->isNotEmpty()) {
             $waypoints = $stops->map(fn($stop) => "{$stop->stop_lat},{$stop->stop_lng}")
                                ->implode('|');
             $waypoints = urlencode($waypoints); // Safely encode for URL
         }
-        
+
         $url = "https://maps.googleapis.com/maps/api/directions/json?" . http_build_query([
             'origin' => "{$updatedStartLat},{$updatedStartLng}",
             'destination' => "{$updatedEndLat},{$updatedEndLng}",
             'key' => $apiKey,
         ]);
-        
+
         if ($waypoints) {
             $url .= "&waypoints=optimize:true|{$waypoints}";
         }
@@ -1169,11 +1160,11 @@ class TripController extends Controller
 
         if ($response->successful()) {
             $data = $response->json();
-           
+
             if($data['routes'] && $data['routes'][0]){
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
-                    
+
                     $decodedCoordinates = [];
                     $stepSize = 150; // Sample every 10th point
 
@@ -1186,7 +1177,7 @@ class TripController extends Controller
                             }
                         }
                     }
-                   
+
                     $polylinePoints = [];
 
                     foreach ($data['routes'][0]['legs'] as $leg) {
@@ -1245,7 +1236,7 @@ class TripController extends Controller
                     // Reset array keys to ensure a clean array structure
                     $finalFilteredPolyline = array_values($finalFilteredPolyline);
                     $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
-                    
+
                     //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
