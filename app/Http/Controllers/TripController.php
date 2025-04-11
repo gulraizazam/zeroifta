@@ -971,15 +971,11 @@ class TripController extends Controller
             return response()->json(['status'=>404,'message'=>'trip not found','data'=>(object)[]],404);
         }
     }
-    private function decodePolyline($encoded)
-    {
+    function decodePolyline($encoded) {
         $points = [];
-        $index = 0;
-        $len = strlen($encoded);
-        $lat = 0;
-        $lng = 0;
+        $index = $lat = $lng = 0;
 
-        while ($index < $len) {
+        while ($index < strlen($encoded)) {
             $b = 0;
             $shift = 0;
             $result = 0;
@@ -993,9 +989,7 @@ class TripController extends Controller
             $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
             $lat += $dlat;
 
-            $shift = 0;
-            $result = 0;
-
+            $shift = $result = 0;
             do {
                 $b = ord($encoded[$index++]) - 63;
                 $result |= ($b & 0x1f) << $shift;
@@ -1005,10 +999,7 @@ class TripController extends Controller
             $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
             $lng += $dlng;
 
-            $points[] = [
-                'lat' => number_format($lat * 1e-5, 5),
-                'lng' => number_format($lng * 1e-5, 5),
-            ];
+            $points[] = ['lat' => $lat / 1e5, 'lng' => $lng / 1e5];
         }
 
         return $points;
