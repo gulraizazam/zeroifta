@@ -1245,16 +1245,16 @@ class TripController extends Controller
                     // Reset array keys to ensure a clean array structure
                     $finalFilteredPolyline = array_values($finalFilteredPolyline);
                     $matchingRecords = $this->loadAndParseFTPData($decodedCoordinates);
-                    $fuelStations = collect($matchingRecords);
-                    $start = ['latitude' => $updatedStartLat, 'longitude' => $updatedStartLng];
+                    // $fuelStations = collect($matchingRecords);
+                    // $start = ['latitude' => $updatedStartLat, 'longitude' => $updatedStartLng];
 
-                    $fuelStations = $fuelStations->map(function ($fuelStation) use ($start,$decodedCoordinates) {
-                        if ($start) {
-                            $fuelStation['distanceFromStart'] = $this->getDistance($start, $fuelStation,$decodedCoordinates);
-                        }
-                        return $fuelStation;
-                    });
-                    dd($fuelStations);
+                    // $fuelStations = $fuelStations->map(function ($fuelStation) use ($start,$decodedCoordinates) {
+                    //     if ($start) {
+                    //         $fuelStation['distanceFromStart'] = $this->getDistance($start, $fuelStation,$decodedCoordinates);
+                    //     }
+                    //     return $fuelStation;
+                    // });
+                    // dd($fuelStations);
 
                     //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
