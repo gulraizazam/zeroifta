@@ -1078,22 +1078,7 @@ class TripController extends Controller
                 'data' => (object) [],
             ],422);
         }
-
-        // Save stops
-        $stopsData = array_map(function ($stop) use ($request) {
-            return [
-                'trip_id' => $request->trip_id,
-                'stop_name' => $stop['stop_name'] ?? null,
-                'stop_lat' => $stop['stop_lat'],
-                'stop_lng' => $stop['stop_lng'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }, $request->stops);
-
-
         $trip = Trip::whereId($request->trip_id)->first();
-
         unset($trip->vehicle_id);
         $startLat = $trip->start_lat;
         $startLng = $trip->start_lng;
@@ -2179,46 +2164,37 @@ function calculateDistance1($lat1, $lng1, $lat2, $lng2) {
 
     return $earthRadius * $c; // Distance in miles
 }
-private function decodePolyline($encoded)
-    {
-        $points = [];
-        $index = 0;
-        $len = strlen($encoded);
-        $lat = 0;
-        $lng = 0;
+function decodePolyline($encoded) {
+    $points = [];
+    $index = $lat = $lng = 0;
 
-        while ($index < $len) {
-            $b = 0;
-            $shift = 0;
-            $result = 0;
+    while ($index < strlen($encoded)) {
+        $b = 0;
+        $shift = 0;
+        $result = 0;
 
-            do {
-                $b = ord($encoded[$index++]) - 63;
-                $result |= ($b & 0x1f) << $shift;
-                $shift += 5;
-            } while ($b >= 0x20);
+        do {
+            $b = ord($encoded[$index++]) - 63;
+            $result |= ($b & 0x1f) << $shift;
+            $shift += 5;
+        } while ($b >= 0x20);
 
-            $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-            $lat += $dlat;
+        $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+        $lat += $dlat;
 
-            $shift = 0;
-            $result = 0;
+        $shift = $result = 0;
+        do {
+            $b = ord($encoded[$index++]) - 63;
+            $result |= ($b & 0x1f) << $shift;
+            $shift += 5;
+        } while ($b >= 0x20);
 
-            do {
-                $b = ord($encoded[$index++]) - 63;
-                $result |= ($b & 0x1f) << $shift;
-                $shift += 5;
-            } while ($b >= 0x20);
+        $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+        $lng += $dlng;
 
-            $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-            $lng += $dlng;
-
-            $points[] = [
-                'lat' => number_format($lat * 1e-5, 5),
-                'lng' => number_format($lng * 1e-5, 5),
-            ];
-        }
-
-        return $points;
+        $points[] = ['lat' => $lat / 1e5, 'lng' => $lng / 1e5];
     }
+
+    return $points;
+}
 }
