@@ -1245,7 +1245,17 @@ class TripController extends Controller
                     // Reset array keys to ensure a clean array structure
                     $finalFilteredPolyline = array_values($finalFilteredPolyline);
                     $matchingRecords = $this->loadAndParseFTPData($decodedCoordinates);
-                    dd($matchingRecords);
+                    $fuelStations = collect($matchingRecords);
+                    $start = ['latitude' => $updatedStartLat, 'longitude' => $updatedStartLng];
+
+                    $fuelStations = $fuelStations->map(function ($fuelStation) use ($start,$decodedCoordinates) {
+                        if ($start) {
+                            $fuelStation['distanceFromStart'] = $this->getDistance($start, $fuelStation,$decodedCoordinates);
+                        }
+                        return $fuelStation;
+                    });
+                    dd($fuelStations);
+
                     //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
@@ -1256,28 +1266,28 @@ class TripController extends Controller
                     $fuelStations = [];
                     $reserve_fuel = $findVehicle->reserve_fuel ?? 0;
 
-                 $totalFuel = $currentFuel+$reserve_fuel;
-                $tripDetailResponse = [
-                    'data' => [
-                        'trip' => [
-                            'start' => [
-                                'latitude' => $updatedStartLat,
-                                'longitude' => $updatedStartLng
+                    $totalFuel = $currentFuel+$reserve_fuel;
+                    $tripDetailResponse = [
+                        'data' => [
+                            'trip' => [
+                                'start' => [
+                                    'latitude' => $updatedStartLat,
+                                    'longitude' => $updatedStartLng
+                                ],
+                                'end' => [
+                                    'latitude' => $updatedEndLat,
+                                    'longitude' => $updatedEndLng
+                                ]
                             ],
-                            'end' => [
-                                'latitude' => $updatedEndLat,
-                                'longitude' => $updatedEndLng
-                            ]
-                        ],
-                        'vehicle' => [
-                            'mpg' => $truckMpg,
-                            'fuelLeft' => $totalFuel
-                        ],
-                        'fuelStations' => $matchingRecords,
-                        'polyline'=>$decodedCoordinates
+                            'vehicle' => [
+                                'mpg' => $truckMpg,
+                                'fuelLeft' => $totalFuel
+                            ],
+                            'fuelStations' => $matchingRecords,
+                            'polyline'=>$decodedCoordinates
 
-                    ]
-                ];
+                        ]
+                    ];
 
                 $result = $this->markOptimumFuelStations($tripDetailResponse);
                 if($result==false){
@@ -1286,6 +1296,7 @@ class TripController extends Controller
                     //$result = $this->findOptimalFuelStation($startLat, $startLng, $truckMpg, $currentFuel, $matchingRecords, $endLat, $endLng);
                     FuelStation::where('trip_id', $trip->id)->delete();
                     foreach ($result as  $value) {
+
                         $fuelStations[] = [
                             'name' => $value['fuel_station_name'] ??'N/A',
                             'latitude' => $value['ftpLat'] ?? 0,
