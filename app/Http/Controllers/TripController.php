@@ -2164,37 +2164,46 @@ function calculateDistance1($lat1, $lng1, $lat2, $lng2) {
 
     return $earthRadius * $c; // Distance in miles
 }
-function decodePolyline($encoded) {
-    $points = [];
-    $index = $lat = $lng = 0;
+private function decodePolyline($encoded)
+    {
+        $points = [];
+        $index = 0;
+        $len = strlen($encoded);
+        $lat = 0;
+        $lng = 0;
 
-    while ($index < strlen($encoded)) {
-        $b = 0;
-        $shift = 0;
-        $result = 0;
+        while ($index < $len) {
+            $b = 0;
+            $shift = 0;
+            $result = 0;
 
-        do {
-            $b = ord($encoded[$index++]) - 63;
-            $result |= ($b & 0x1f) << $shift;
-            $shift += 5;
-        } while ($b >= 0x20);
+            do {
+                $b = ord($encoded[$index++]) - 63;
+                $result |= ($b & 0x1f) << $shift;
+                $shift += 5;
+            } while ($b >= 0x20);
 
-        $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-        $lat += $dlat;
+            $dlat = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+            $lat += $dlat;
 
-        $shift = $result = 0;
-        do {
-            $b = ord($encoded[$index++]) - 63;
-            $result |= ($b & 0x1f) << $shift;
-            $shift += 5;
-        } while ($b >= 0x20);
+            $shift = 0;
+            $result = 0;
 
-        $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
-        $lng += $dlng;
+            do {
+                $b = ord($encoded[$index++]) - 63;
+                $result |= ($b & 0x1f) << $shift;
+                $shift += 5;
+            } while ($b >= 0x20);
 
-        $points[] = ['lat' => $lat / 1e5, 'lng' => $lng / 1e5];
+            $dlng = (($result & 1) ? ~($result >> 1) : ($result >> 1));
+            $lng += $dlng;
+
+            $points[] = [
+                'lat' => number_format($lat * 1e-5, 5),
+                'lng' => number_format($lng * 1e-5, 5),
+            ];
+        }
+
+        return $points;
     }
-
-    return $points;
-}
 }
