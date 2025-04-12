@@ -319,7 +319,7 @@ class IFTAController extends Controller
     public function getDecodedPolyline(Request $request, FcmService $firebaseService)
     {
         // Increase execution time to handle long requests
-        ini_set('max_execution_time', 600);
+        ini_set('max_execution_time', 300);
         ///validating all data///
         $validatedData =$request->validate([
             'user_id'   => 'required|exists:users,id',
