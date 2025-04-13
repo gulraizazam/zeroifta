@@ -174,9 +174,10 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
           {{__('messages.Cancel')}}
         </button>
-        <button type="button" class="btn btn-warning" onclick="proceedWithDeletion('keep')">
+        <!-- DB Integrity Issue that's why we're not using this button -->
+        <!-- <button type="button" class="btn btn-warning" onclick="proceedWithDeletion('keep')">
           {{__('messages.Keep Payment Records')}}
-        </button>
+        </button> -->
         <button type="button" class="btn btn-danger" onclick="proceedWithDeletion('delete')">
           {{__('messages.Delete Payment Records')}}
         </button>
