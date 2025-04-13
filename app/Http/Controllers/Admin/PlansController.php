@@ -96,8 +96,8 @@ class PlansController extends Controller
         // Update the plan in the database
         $plan->name = $request->name;
         $plan->price = $request->price;
-        $plan->billing_period = $request->recurring ? $request->billing_period : null;
-        $plan->recurring = $request->recurring ? $request->billing_period : 1;
+        $plan->billing_period = $request->billing_period;
+        $plan->recurring = (bool)$request->recurring;
         $plan->description = $request->description;
         $plan->features = $features;
         $plan->update();
