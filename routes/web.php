@@ -275,3 +275,10 @@ Route::middleware('auth')->group(function () {
 
   Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
 });
+
+// Subscription routes
+Route::get('/subscription/success', function () {
+    return view('subscription.success');
+})->name('subscription.success');
+
+Route::get('/subscription/manage', [SubscriptionController::class, 'manage'])->name('subscription.manage');
