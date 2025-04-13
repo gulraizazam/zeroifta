@@ -73,6 +73,94 @@
             </div>
         </div>
     </div>
+
+    <!-- Add this section after the existing form fields -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4 class="card-title">{{__('messages.Plan Features')}}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        {{__('messages.Select the features that will be available in this plan')}}
+                    </div>
+                    
+                    <div class="features-grid">
+                        @php
+                            $availableFeatures = [
+                                'vehicles.all' => 'View All Vehicles',
+                                'vehicles.create' => 'Create Vehicle',
+                                'vehicles.edit' => 'Edit Vehicle',
+                                'vehicles.delete' => 'Delete Vehicle',
+                                'vehicles.import' => 'Import Vehicles',
+                                'driver_vehicles.index' => 'View Driver Vehicles',
+                                'driver_vehicles.create' => 'Assign Vehicles to Drivers',
+                                'driver_vehicles.edit' => 'Edit Driver Vehicle Assignment',
+                                'driver_vehicles.delete' => 'Remove Driver Vehicle Assignment',
+                                'drivers.all' => 'View All Drivers',
+                                'drivers.create' => 'Create Driver',
+                                'drivers.edit' => 'Edit Driver',
+                                'drivers.delete' => 'Delete Driver',
+                                'drivers.import' => 'Import Drivers',
+                                'drivers.track' => 'Track Drivers',
+                                'fleet.view' => 'View Fleet Management',
+                            ];
+                            $selectedFeatures = old('features', $plan->features ?? []);
+                        @endphp
+
+                        @foreach($availableFeatures as $key => $label)
+                        <div class="feature-item">
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       class="form-check-input" 
+                                       name="features[]" 
+                                       value="{{ $key }}"
+                                       id="feature_{{ $key }}"
+                                       {{ in_array($key, $selectedFeatures) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="feature_{{ $key }}">
+                                    {{ __('messages.' . $label) }}
+                                </label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@push('styles')
+<style>
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.feature-item {
+    padding: 0.5rem;
+    border: 1px solid #eee;
+    border-radius: 0.25rem;
+    background-color: var(--card-bg-color);
+}
+
+.dark-mode .feature-item {
+    border-color: #4a5568;
+}
+
+.form-check-input:checked {
+    background-color: #0c388b;
+    border-color: #0c388b;
+}
+
+.dark-mode .form-check-input:checked {
+    background-color: #fff;
+    border-color: #fff;
+}
+</style>
+@endpush
 
 @endsection
