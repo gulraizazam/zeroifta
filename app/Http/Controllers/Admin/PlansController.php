@@ -113,4 +113,37 @@ class PlansController extends Controller
         $plan->delete();
         return redirect('plans')->withError('Plan Deleted Successfully');
     }
+
+    public function toggleStatus($id)
+    {
+        try {
+            $plan = Plan::findOrFail($id);
+            $plan->is_active = !$plan->is_active;
+            $plan->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.Plan status updated successfully'),
+                'is_active' => $plan->is_active
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Plan status toggle failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.Failed to update plan status')
+            ], 500);
+        }
+    }
+
+    public function updateOrder(Request $request)
+    {
+        foreach ($request->order as $index => $planId) {
+            Plan::where('id', $planId)->update(['sort_order' => $index]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Plan order updated successfully'
+        ]);
+    }
 }

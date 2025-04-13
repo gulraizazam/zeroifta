@@ -196,14 +196,21 @@ return [
     "License Plate No."=>"License Plate No.",
     "Current Password"=>"Current Password",
     "New Password"=>"New Password",
-
-
-
-
-
-
-
-
-
-
+    "Manage Subscription Plans" => 'Manage Subscription Plans',
+    "Add New Plan" => 'Add New Plan',
+    "Plan Name" => 'Plan Name',
+    "Price" => 'Price',
+    "Billing Period" => 'Billing Period',
+    "Status" => 'Status',
+    "Subscribers" => 'Subscribers',
+    "Actions" => 'Actions',
+    "Confirm Delete" => 'Confirm Delete',
+    "Are you sure you want to delete this plan?" => 'Are you sure you want to delete this plan?',
+    "Cancel" => 'Cancel',
+    "Delete" => 'Delete',
+    "Search" => 'Search',
+    "Show" => 'Show',
+    "entries" => 'entries',
+    "Plan status updated successfully" => 'Plan status updated successfully',
+    "Failed to update plan status" => 'Failed to update plan status',
 ];
