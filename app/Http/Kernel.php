@@ -71,4 +71,9 @@ class Kernel extends HttpKernel
         'localeViewPath' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath::class,
         'verify.api.token' => \App\Http\Middleware\VerifyApiTokenMiddleware::class,
     ];
+
+    protected $routeMiddleware = [
+        // ... other middlewares ...
+        'check.plan.feature' => \App\Http\Middleware\CheckPlanFeature::class,
+    ];
 }

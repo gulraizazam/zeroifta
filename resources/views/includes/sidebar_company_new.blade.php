@@ -131,7 +131,7 @@
           </a>
         </li>
         <li>
-          <a href="{{route('subscribe')}}" class="sidebar_li {{ Request::is(app()->getLocale() .'/subscribe') ? 'menu_active' : '' }}">
+          <a href="{{route('subscription')}}" class="sidebar_li {{ Request::is(app()->getLocale() .'/subscription') ? 'menu_active' : '' }}">
             <span class="fill-svg">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28" fill="none">
                 <g clip-path="url(#clip0_2033_1598)">

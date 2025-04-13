@@ -18,6 +18,7 @@ class Plan extends Model
         'stripe_price_id',
         'description',
         'is_active',
+        'is_featured',
         'sort_order',
         'features',
         'badge_text',
@@ -27,6 +28,7 @@ class Plan extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_featured' => 'boolean',
         'features' => 'array'
     ];
 }

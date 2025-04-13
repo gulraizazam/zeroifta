@@ -42,6 +42,7 @@
                     <th>{{__('messages.Price')}}</th>
                     <th>{{__('messages.Billing Period')}}</th>
                     <th>{{__('messages.Status')}}</th>
+                    <th>{{__('messages.Featured')}}</th>
                     <th>{{__('messages.Subscribers')}}</th>
                     <th>{{__('messages.Actions')}}</th>
                   </tr>
@@ -78,9 +79,22 @@
                     </td>
                     <td>
                       <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" 
+                        <input class="form-check-input status-toggle" type="checkbox" 
                                data-plan-id="{{ $plan->id }}"
                                {{ $plan->is_active ? 'checked' : '' }}>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input featured-toggle" 
+                               type="checkbox" 
+                               data-plan-id="{{ $plan->id }}"
+                               {{ $plan->is_featured ? 'checked' : '' }}>
+                        @if($plan->is_featured)
+                          <span class="featured-badge">
+                            <i class="fas fa-star"></i>
+                          </span>
+                        @endif
                       </div>
                     </td>
                     <td>
@@ -163,6 +177,26 @@
   width: 2.5em;
 }
 
+.featured-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  color: #ffc107;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.form-switch .featured-toggle:checked {
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
 @media (max-width: 768px) {
   .table-responsive {
     border: 0;
@@ -213,9 +247,9 @@ $(document).ready(function() {
     });
 
     // Handle status toggle
-    $('.form-check-input').on('change', function() {
+    $('.status-toggle').on('change', function() {
         const planId = $(this).attr('data-plan-id');
-        const $switch = $(this);
+        const $statusSwitch = $(this);
         
         $.ajax({
             url: "{{ url('plans') }}/" + planId + "/toggle-status",
@@ -226,18 +260,51 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     toastr.success(response.message);
-                    // Update switch state based on response
-                    $switch.prop('checked', response.is_active);
+                    $statusSwitch.prop('checked', response.is_active);
                 } else {
                     toastr.error(response.message);
-                    // Revert switch state on failure
-                    $switch.prop('checked', !$switch.prop('checked'));
+                    $statusSwitch.prop('checked', !$statusSwitch.prop('checked'));
                 }
             },
             error: function(xhr) {
                 toastr.error("{{__('messages.Failed to update plan status')}}");
-                // Revert switch state on error
-                $switch.prop('checked', !$switch.prop('checked'));
+                $statusSwitch.prop('checked', !$statusSwitch.prop('checked'));
+            }
+        });
+    });
+
+    // Handle featured toggle separately
+    $('.featured-toggle').on('change', function() {
+        const planId = $(this).attr('data-plan-id');
+        const $featuredSwitch = $(this);
+        const $badgeContainer = $featuredSwitch.closest('td');
+        
+        $.ajax({
+            url: `{{ url(app()->getLocale()) }}/plans/${planId}/toggle-featured`,
+            type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    if (response.is_featured) {
+                        // Add featured badge if it doesn't exist
+                        if (!$badgeContainer.find('.featured-badge').length) {
+                            $badgeContainer.append('<span class="featured-badge"><i class="fas fa-star"></i></span>');
+                        }
+                    } else {
+                        // Remove featured badge
+                        $badgeContainer.find('.featured-badge').remove();
+                    }
+                } else {
+                    toastr.error(response.message);
+                    $featuredSwitch.prop('checked', !$featuredSwitch.prop('checked'));
+                }
+            },
+            error: function(xhr) {
+                toastr.error("{{__('messages.Failed to update plan featured status')}}");
+                $featuredSwitch.prop('checked', !$featuredSwitch.prop('checked'));
             }
         });
     });

@@ -147,4 +147,28 @@ class PlansController extends Controller
             'message' => 'Plan order updated successfully'
         ]);
     }
+
+    public function toggleFeatured($id)
+    {
+        try {
+            $plan = Plan::findOrFail($id);
+            // Simply toggle the featured status
+            $plan->is_featured = !$plan->is_featured;
+            $plan->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => $plan->is_featured 
+                    ? __('messages.Plan marked as featured')
+                    : __('messages.Plan removed from featured'),
+                'is_featured' => $plan->is_featured
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Plan featured toggle failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.Failed to update plan featured status')
+            ], 500);
+        }
+    }
 }

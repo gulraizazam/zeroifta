@@ -9,6 +9,7 @@
         "aws/aws-sdk-php": "^3.342",
         "guzzlehttp/guzzle": "^7.2",
         "kreait/laravel-firebase": "^5.10",
+        "laravel/cashier": "^15.6",
         "laravel/framework": "^10.0",
         "laravel/passport": "^12.2",
         "laravel/sanctum": "^3.2",

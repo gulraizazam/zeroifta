@@ -46,4 +46,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Vehicle::class, 'owner_id');
     }
+
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class)->where('status', 'active');
+    }
+
+    public function hasFeature($feature)
+    {
+        $subscription = $this->subscription;
+        if (!$subscription || !$subscription->plan || !$subscription->plan->is_active) {
+            return false;
+        }
+        
+        return is_array($subscription->plan->features) && in_array($feature, $subscription->plan->features);
+    }
 }
