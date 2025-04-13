@@ -36,22 +36,22 @@ class PaymentController extends Controller
         ]);
 
         try {
-            Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
-            $user = Auth::user();
-            $paymentMethod = $request->payment_method;
+        $user = Auth::user();
+        $paymentMethod = $request->payment_method;
             $plan = Plan::findOrFail($request->plan_id);
 
             // Create or retrieve Stripe customer
             if (!$user->stripe_customer_id) {
-                $customer = Customer::create([
-                    'email' => $user->email,
-                    'name' => $user->name,
-                    'payment_method' => $paymentMethod,
-                    'invoice_settings' => [
-                        'default_payment_method' => $paymentMethod,
-                    ],
-                ]);
+        $customer = Customer::create([
+            'email' => $user->email,
+            'name' => $user->name,
+            'payment_method' => $paymentMethod,
+            'invoice_settings' => [
+                'default_payment_method' => $paymentMethod,
+            ],
+        ]);
                 $user->stripe_customer_id = $customer->id;
                 $user->save();
             } else {
@@ -96,15 +96,15 @@ class PaymentController extends Controller
                 ]);
 
                 $existingSubscription->update([
-                    'plan_id' => $plan->id,
+                'plan_id' => $plan->id,
                     'status' => $updatedSubscription->status,
-                ]);
+            ]);
 
                 $subscription = $existingSubscription;
-            } else {
+        } else {
                 // Create new subscription
                 $stripeSubscription = Subscription::create([
-                    'customer' => $customer->id,
+                'customer' => $customer->id,
                     'items' => [
                         ['price' => $plan->stripe_plan_id],
                     ],

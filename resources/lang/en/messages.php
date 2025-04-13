@@ -320,4 +320,12 @@ return [
     'Please subscribe to access this feature' => 'Please subscribe to access this feature',
     'Your subscription plan is inactive' => 'Your subscription plan is inactive',
     'Your current plan does not include this feature. Please upgrade.' => 'Your current plan does not include this feature. Please upgrade.',
+    'Payment Records Found' => 'Payment Records Found',
+    'This plan has associated payment records. How would you like to proceed?' => 'This plan has associated payment records. How would you like to proceed?',
+    'Deleting payment records cannot be undone.' => 'Deleting payment records cannot be undone.',
+    'Delete Payment Records' => 'Delete Payment Records',
+    'Keep Payment Records' => 'Keep Payment Records',
+    'Cannot delete plan: There are active subscriptions using this plan' => 'Cannot delete plan: There are active subscriptions using this plan',
+    'Delete' => 'Delete',
+    'Cancel' => 'Cancel',
 ];

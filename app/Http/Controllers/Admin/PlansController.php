@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Models\Subscription;
 use Exception;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
@@ -104,15 +105,64 @@ class PlansController extends Controller
 
         return redirect('plans')->withSuccess('Plan Updated Successfully');
     }
+    public function checkPayments($id)
+    {
+        try {
+            $hasPayments = Payment::where('plan_id', $id)->exists();
+            return response()->json(['has_payments' => $hasPayments]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
     public function delete($id)
     {
-        $plan = Plan::find($id);
-        $payments = Payment::where('plan_id',$id)->first();
-        if($payments){
-            return redirect()->back()->withError('Subscription exist against this plan. you can not delete this.');
+        try {
+            $plan = Plan::findOrFail($id);
+            
+            // Check for active subscriptions
+            $activeSubscriptions = Subscription::where('plan_id', $id)
+                ->where('status', 'active')
+                ->exists();
+                
+            if ($activeSubscriptions) {
+                return redirect()->back()
+                    ->withError(__('messages.Cannot delete plan: There are active subscriptions using this plan'));
+            }
+
+            // Handle payment records based on user choice
+            $handlePayments = request('handle_payments', 'keep');
+            
+            if ($handlePayments === 'delete') {
+                // Delete associated payment records
+                Payment::where('plan_id', $id)->delete();
+            } elseif ($handlePayments === 'keep') {
+                // Set plan_id to null in payment records
+                Payment::where('plan_id', $id)->update(['plan_id' => null]);
+            }
+
+            // Delete the plan from Stripe if it exists
+            if ($plan->stripe_plan_id) {
+                try {
+                    Stripe::setApiKey(config('services.stripe.secret'));
+                    $product = Product::retrieve($plan->stripe_plan_id);
+                    $product->delete();
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to delete Stripe product: ' . $e->getMessage());
+                    // Continue with deletion even if Stripe deletion fails
+                }
+            }
+
+            // Delete the plan from our database
+            $plan->delete();
+
+            return redirect()->route('plans')
+                ->withSuccess(__('messages.Plan deleted successfully'));
+                
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete plan: ' . $e->getMessage());
+            return redirect()->back()
+                ->withError(__('messages.Failed to delete plan: ') . $e->getMessage());
         }
-        $plan->delete();
-        return redirect('plans')->withError('Plan Deleted Successfully');
     }
 
     public function toggleStatus($id)

@@ -155,7 +155,8 @@ Route::middleware('auth')->group(function () {
     Route::post('plans/store', [PlansController::class, 'store'])->name('plans.store');
     Route::get('plans/edit/{id}', [PlansController::class, 'edit'])->name('plans.edit');
     Route::post('plans/update/{id}', [PlansController::class, 'update'])->name('plans.update');
-    Route::get('plans/delete/{id}', [PlansController::class, 'delete'])->name('plans.delete');
+    Route::get('plans/{id}/check-payments', [PlansController::class, 'checkPayments'])->name('plans.check-payments');
+    Route::delete('plans/{id}', [PlansController::class, 'delete'])->name('plans.delete');
     Route::post('plans/{id}/toggle-status', [PlansController::class, 'toggleStatus'])->name('plans.toggle-status');
     Route::post('plans/{id}/toggle-featured', [PlansController::class, 'toggleFeatured'])->name('plans.toggle-featured');
     Route::post('/plans/update-order', [PlansController::class, 'updateOrder'])->name('plans.update-order');

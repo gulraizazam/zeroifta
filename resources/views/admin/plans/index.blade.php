@@ -145,10 +145,41 @@
         <form id="deletePlanForm" method="POST">
           @csrf
           @method('DELETE')
+          <input type="hidden" name="handle_payments" value="keep">
           <button type="submit" class="btn btn-danger">
             {{__('messages.Delete')}}
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Records Handling Modal -->
+<div class="modal fade" id="paymentRecordsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{__('messages.Payment Records Found')}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>{{__('messages.This plan has associated payment records. How would you like to proceed?')}}</p>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          {{__('messages.Deleting payment records cannot be undone.')}}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          {{__('messages.Cancel')}}
+        </button>
+        <button type="button" class="btn btn-warning" onclick="proceedWithDeletion('keep')">
+          {{__('messages.Keep Payment Records')}}
+        </button>
+        <button type="button" class="btn btn-danger" onclick="proceedWithDeletion('delete')">
+          {{__('messages.Delete Payment Records')}}
+        </button>
       </div>
     </div>
   </div>
@@ -311,7 +342,31 @@ $(document).ready(function() {
 });
 
 function confirmDelete(planId) {
-    $('#deletePlanForm').attr('action', "{{ url('plans') }}/" + planId + "/delete");
+    // First check if plan has payment records
+    $.ajax({
+        url: "{{ url('plans') }}/" + planId + "/check-payments",
+        type: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            $('#deletePlanForm').attr('action', "{{ route('plans.delete', '') }}/" + planId);
+            
+            if (response.has_payments) {
+                $('#paymentRecordsModal').modal('show');
+            } else {
+                $('#deleteModal').modal('show');
+            }
+        },
+        error: function(xhr) {
+            toastr.error("{{__('messages.Failed to check plan status')}}");
+        }
+    });
+}
+
+function proceedWithDeletion(handlePayments) {
+    $('#paymentRecordsModal').modal('hide');
+    $('input[name="handle_payments"]').val(handlePayments);
     $('#deleteModal').modal('show');
 }
 
