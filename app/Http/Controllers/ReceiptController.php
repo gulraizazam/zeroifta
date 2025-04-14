@@ -41,7 +41,7 @@ class ReceiptController extends Controller
             'fuel_station_name' => 'required',
             'price_per_gallon' => 'required',
             'gallons_bought' => 'required',
-            'location' => 'required',
+            //'location' => 'required',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // max 10MB
         ]);
 
