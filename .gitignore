@@ -18,3 +18,6 @@ yarn-error.log
 /.vscode
 composer.json
 composer.lock
+
+/js-backend/node_modules
+/js-backend/.env
