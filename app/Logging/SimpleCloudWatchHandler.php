@@ -5,6 +5,7 @@ namespace App\Logging;
 use Aws\CloudWatchLogs\CloudWatchLogsClient;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger;
+use Monolog\LogRecord;
 
 class SimpleCloudWatchHandler extends AbstractProcessingHandler
 {
@@ -12,6 +13,7 @@ class SimpleCloudWatchHandler extends AbstractProcessingHandler
     protected $logGroupName;
     protected $logStreamName;
     protected $sequenceToken;
+   
 
     public function __construct(CloudWatchLogsClient $client, $logGroupName, $logStreamName, $level = Logger::DEBUG, bool $bubble = true)
     {
@@ -45,25 +47,26 @@ class SimpleCloudWatchHandler extends AbstractProcessingHandler
         }
     }
 
-    protected function write(array $record): void
-    {
-        $data = [
-            'logGroupName' => $this->logGroupName,
-            'logStreamName' => $this->logStreamName,
-            'logEvents' => [
-                [
-                    'timestamp' => round(microtime(true) * 1000),
-                    'message' => $record['formatted'],
-                ],
+    protected function write(LogRecord $record): void
+{
+    $data = [
+        'logGroupName' => $this->logGroupName,
+        'logStreamName' => $this->logStreamName,
+        'logEvents' => [
+            [
+                'timestamp' => round(microtime(true) * 1000),
+                'message' => (string) $record->formatted,
             ],
-        ];
+        ],
+    ];
 
-        if ($this->sequenceToken) {
-            $data['sequenceToken'] = $this->sequenceToken;
-        }
-
-        $result = $this->client->putLogEvents($data);
-
-        $this->sequenceToken = $result['nextSequenceToken'];
+    if ($this->sequenceToken) {
+        $data['sequenceToken'] = $this->sequenceToken;
     }
+
+    $result = $this->client->putLogEvents($data);
+
+    $this->sequenceToken = $result['nextSequenceToken'];
+}
+
 }
