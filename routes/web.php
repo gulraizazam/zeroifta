@@ -47,31 +47,17 @@ use App\Http\Controllers\Company\SubscriptionController;
 
 Route::get('/testsocket', [AdminController::class, 'socket']);
 Route::get('/testftp', [AdminController::class, 'testftp']);
-Route::get('/test-divide-zero', function () {
+Route::get('/test-log', function () {
+  logger()->info("Testing CloudWatch log at " . now());
+
+  // Force a division by zero
   try {
-      // Intentionally divide by zero
-      $a = 10;
-      $b = 0;
-      $result = $a / $b; // This will throw a DivisionByZeroError
-
-      return response()->json(['result' => $result]);
-  } catch (\DivisionByZeroError $e) {
-      Log::error('Division by zero error occurred.', [
-          'message' => $e->getMessage(),
-          'time' => now()->toDateTimeString(), // App timezone
-          'utc_time' => now()->utc()->toDateTimeString(),
-      ]);
-
-      return response()->json(['error' => 'Division by zero caught and logged.'], 500);
+      $x = 5 / 0;
   } catch (\Throwable $e) {
-      Log::error('Unexpected error occurred during division.', [
-          'message' => $e->getMessage(),
-          'time' => now()->toDateTimeString(),
-          'utc_time' => now()->utc()->toDateTimeString(),
-      ]);
-
-      return response()->json(['error' => 'Unexpected error caught and logged.'], 500);
+      logger()->error('Division by zero: ' . $e->getMessage());
   }
+
+  return 'Logged to CloudWatch (check CloudWatch console)';
 });
 Route::get('/get-fcm-token', function () {
     $token = DB::table('fcm_tokens')->where('user_id', auth()->id())->value('token');
