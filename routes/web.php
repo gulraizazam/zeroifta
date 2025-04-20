@@ -63,9 +63,20 @@ Route::get('/get-fcm-token', function () {
     $token = DB::table('fcm_tokens')->where('user_id', auth()->id())->value('token');
     return response()->json(['fcm_token' => $token]);
 });
-Route::get('/test-log', function () {
-    Log::channel('cloudwatch')->info('This is a test log from Laravel.');
-    return "Log sent to CloudWatch!";
+Route::get('/test-cloudwatch-log', function () {
+  try {
+      // This will throw a DivisionByZeroError
+      $result = 100 / 0;
+  } catch (\Throwable $e) {
+      Log::channel('cloudwatch')->error('Division by zero error', [
+          'message' => $e->getMessage(),
+          'file' => $e->getFile(),
+          'line' => $e->getLine(),
+          'trace' => $e->getTraceAsString(),
+      ]);
+
+      return response()->json(['error' => 'Something went wrong. Check logs.']);
+  }
 });
 Route::post('/store-fcm-token', function (Request $request) {
     $request->validate(['fcm_token' => 'required|string']);
