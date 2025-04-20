@@ -73,7 +73,7 @@ Route::post('dashboard',[DriverDashboardController::class,'index']);
     Route::post('chat/get',[DriverContactUsController::class,'getChat']);
     Route::post('chat/send',[DriverContactUsController::class,'send']);
 
-    Route::post('/trip/start', [IFTAController::class, 'getDecodedPolyline']);
+    Route::post('/trip/start', [TripController::class, 'startTrip']);
     Route::post('/get-active-trip', [TripController::class, 'getActiveTrip']);
     Route::post('/check-active-trip', [TripController::class, 'checkActiveTrip']);
     Route::post('/trip/update', [IFTAController::class, 'updateTrip']);
