@@ -113,10 +113,10 @@ class IFTAController extends Controller
                     $totalDurationMilliseconds = $totalDuration * 1000; // Duration in milliseconds
                 
                     // Format distance
-                    $formattedDistance = $totalDistanceMeters . ' meters';
+                    $formattedDistance = $totalDistanceMeters;
                 
                     // Format duration in milliseconds
-                    $formattedDuration = $totalDurationMilliseconds . ' ms';
+                    $formattedDuration = $totalDurationMilliseconds;
                 }
                 if (isset($data['routes'][0]['overview_polyline']['points'])) {
                     $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
@@ -397,10 +397,10 @@ class IFTAController extends Controller
                     $totalDurationMilliseconds = $totalDuration * 1000; // Duration in milliseconds
                 
                     // Format distance
-                    $formattedDistance = $totalDistanceMeters . ' meters';
+                    $formattedDistance = $totalDistanceMeters;
                 
                     // Format duration in milliseconds
-                    $formattedDuration = $totalDurationMilliseconds . ' ms';
+                    $formattedDuration = $totalDurationMilliseconds;
                 }
                 if (isset($data['routes'][0]['overview_polyline']['points'])) {
                     $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
