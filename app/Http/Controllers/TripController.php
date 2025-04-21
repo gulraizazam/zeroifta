@@ -22,7 +22,7 @@ class TripController extends Controller
 
     public function __construct()
     {
-        $this->nodeApiUrl = env('NODE_API_URL', 'https://localhost:3000');
+        $this->nodeApiUrl = env('NODE_API_URL', 'https://staging.zeroifta.com:3001');
     }
 
     public function startTrip(Request $request)
