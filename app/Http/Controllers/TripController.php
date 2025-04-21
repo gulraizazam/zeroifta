@@ -167,28 +167,23 @@ class TripController extends Controller
                 if($route){
                     $totalDistance = 0;
                     $totalDuration = 0;
-
+                
                     foreach ($route['legs'] as $leg) {
                         $totalDistance += $leg['distance']['value']; // Distance in meters
                         $totalDuration += $leg['duration']['value']; // Duration in seconds
                     }
-
-                    // Convert meters to miles
-                    $totalDistanceMiles = round($totalDistance * 0.000621371, 2);
-
-                    // Convert seconds to hours and minutes
-                    $hours = floor($totalDuration / 3600);
-                    $minutes = floor(($totalDuration % 3600) / 60);
-
+                
+                    // Keep distance in meters (no conversion needed)
+                    $totalDistanceMeters = $totalDistance;
+                
+                    // Convert seconds to milliseconds
+                    $totalDurationMilliseconds = $totalDuration * 1000; // Duration in milliseconds
+                
                     // Format distance
-                    $formattedDistance = $totalDistanceMiles . ' miles';
-
-                    // Format duration
-                    if ($hours > 0) {
-                        $formattedDuration = "{$hours} hr {$minutes} min";
-                    } else {
-                        $formattedDuration = "{$minutes} min";
-                    }
+                    $formattedDistance = $totalDistanceMeters . ' meters';
+                
+                    // Format duration in milliseconds
+                    $formattedDuration = $totalDurationMilliseconds . ' ms';
                 }
                 if (isset($data['routes'][0]['overview_polyline']['points'])) {
                     $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
@@ -1164,31 +1159,26 @@ class TripController extends Controller
                    // $completePolyline = implode('', $polylinePoints);
                 }
                 $route = $data['routes'][0] ?? null;
-                if ($route) {
+                if($route){
                     $totalDistance = 0;
                     $totalDuration = 0;
-
+                
                     foreach ($route['legs'] as $leg) {
                         $totalDistance += $leg['distance']['value']; // Distance in meters
                         $totalDuration += $leg['duration']['value']; // Duration in seconds
                     }
-
-                    // Convert meters to miles
-                    $totalDistanceMiles = round($totalDistance * 0.000621371, 2);
-
-                    // Convert seconds to hours and minutes
-                    $hours = floor($totalDuration / 3600);
-                    $minutes = floor(($totalDuration % 3600) / 60);
-
+                
+                    // Keep distance in meters (no conversion needed)
+                    $totalDistanceMeters = $totalDistance;
+                
+                    // Convert seconds to milliseconds
+                    $totalDurationMilliseconds = $totalDuration * 1000; // Duration in milliseconds
+                
                     // Format distance
-                    $formattedDistance = $totalDistanceMiles . ' miles';
-
-                    // Format duration
-                    if ($hours > 0) {
-                        $formattedDuration = "{$hours} hr {$minutes} min";
-                    } else {
-                        $formattedDuration = "{$minutes} min";
-                    }
+                    $formattedDistance = $totalDistanceMeters . ' meters';
+                
+                    // Format duration in milliseconds
+                    $formattedDuration = $totalDurationMilliseconds . ' ms';
                 }
                 if (isset($data['routes'][0]['overview_polyline']['points'])) {
                     $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
@@ -1405,31 +1395,26 @@ class TripController extends Controller
                    // $completePolyline = implode('', $polylinePoints);
                 }
                 $route = $data['routes'][0] ?? null;
-                if ($route) {
+                if($route){
                     $totalDistance = 0;
                     $totalDuration = 0;
-
+                
                     foreach ($route['legs'] as $leg) {
                         $totalDistance += $leg['distance']['value']; // Distance in meters
                         $totalDuration += $leg['duration']['value']; // Duration in seconds
                     }
-
-                    // Convert meters to miles
-                    $totalDistanceMiles = round($totalDistance * 0.000621371, 2);
-
-                    // Convert seconds to hours and minutes
-                    $hours = floor($totalDuration / 3600);
-                    $minutes = floor(($totalDuration % 3600) / 60);
-
+                
+                    // Keep distance in meters (no conversion needed)
+                    $totalDistanceMeters = $totalDistance;
+                
+                    // Convert seconds to milliseconds
+                    $totalDurationMilliseconds = $totalDuration * 1000; // Duration in milliseconds
+                
                     // Format distance
-                    $formattedDistance = $totalDistanceMiles . ' miles';
-
-                    // Format duration
-                    if ($hours > 0) {
-                        $formattedDuration = "{$hours} hr {$minutes} min";
-                    } else {
-                        $formattedDuration = "{$minutes} min";
-                    }
+                    $formattedDistance = $totalDistanceMeters . ' meters';
+                
+                    // Format duration in milliseconds
+                    $formattedDuration = $totalDurationMilliseconds . ' ms';
                 }
                 if (isset($data['routes'][0]['overview_polyline']['points'])) {
                     $encodedPolyline = $data['routes'][0]['overview_polyline']['points'];
