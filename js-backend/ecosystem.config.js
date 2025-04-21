@@ -4,7 +4,7 @@ module.exports = {
         name: "ZeroIFTA JS Backend - SK",
         script: "./server.js",
         env: {
-          PORT: 3000,
+          PORT: 3001,
           NODE_ENV: "production",
           DB_HOST: "localhost",
           DB_DATABASE: "zeroifta", 
