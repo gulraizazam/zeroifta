@@ -16,6 +16,8 @@ class Trip extends Model
         'updated_start_lng' => 'string',
         'updated_end_lat' => 'string',
         'updated_end_lng' => 'string',
+        'distance'=>'string',
+        'duration'=>'string'
     ];
     public function driverVehicle()
     {
