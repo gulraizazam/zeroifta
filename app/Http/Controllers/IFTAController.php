@@ -87,14 +87,18 @@ class IFTAController extends Controller
                         if (!empty($leg['steps'])) {
                             foreach ($leg['steps'] as $step) {
                                 if (isset($step['polyline']['points'])) {
-                                    $polylinePoints[] = $step['polyline']['points'];
+                                    $polylinePoints[] = [
+                                        'polyline' => $step['polyline']['points'],
+                                        'instructions' => isset($step['html_instructions']) 
+                                            ? strip_tags($step['html_instructions']) 
+                                            : '',
+                                    ];
                                 }
                             }
                         }
                     }
 
-                    // Filter out any null values if necessary
-                    $polylinePoints = array_filter($polylinePoints);
+                   
                 }
                 $route = $data['routes'][0];
                 if($route){
@@ -368,15 +372,21 @@ class IFTAController extends Controller
                                 $decodedCoordinates[] = $points[$i];
                             }
                         }
+                        $polylinePoints[] = [
+                            'polyline' => $step['polyline']['points'],
+                            'instructions' => isset($step['html_instructions']) 
+                                ? strip_tags($step['html_instructions']) 
+                                : '',
+                        ];
                     }
 
                     // Extract polyline points as an array of strings
-                    $polylinePoints = array_map(function ($step) {
-                        return $step['polyline']['points'] ?? null;
-                    }, $steps);
+                    // $polylinePoints = array_map(function ($step) {
+                    //     return $step['polyline']['points'] ?? null;
+                    // }, $steps);
 
-                    // Filter out any null values if necessary
-                    $polylinePoints = array_filter($polylinePoints);
+                    // // Filter out any null values if necessary
+                    // $polylinePoints = array_filter($polylinePoints);
 
 
                 }

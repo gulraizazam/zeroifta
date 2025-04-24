@@ -153,15 +153,17 @@ class TripController extends Controller
                     foreach ($data['routes'][0]['legs'] as $leg) {
                         if (!empty($leg['steps'])) {
                             foreach ($leg['steps'] as $step) {
-                                if (isset($step['polyline']['points'])) {
-                                    $polylinePoints[] = $step['polyline']['points'];
-                                }
+                                $polylinePoints[] = [
+                                    'polyline' => $step['polyline']['points'],
+                                    'instructions' => isset($step['html_instructions']) 
+                                        ? strip_tags($step['html_instructions']) 
+                                        : '',
+                                ];
                             }
                         }
                     }
 
-                    // Filter out any null values if necessary
-                    $polylinePoints = array_filter($polylinePoints);
+                    
                 }
                 $route = $data['routes'][0];
                 if($route){
@@ -807,7 +809,9 @@ class TripController extends Controller
         $updatedStartLng = $trip->updated_start_lng;
         $updatedEndLat =$trip->updated_end_lat;
         $updatedEndLng = $trip->updated_end_lng;
-        $polylinePoints = json_decode($trip->polyline, true);
+        $decodePolylinePoints = json_decode($trip->polyline, true);
+        $polylinePoints = array_column($decodePolylinePoints, 'polyline');
+        
         $decodedCoordinates = [];
         $stepSize = 150; // Sample every 3rd point
         foreach ($polylinePoints as $points) {
@@ -833,6 +837,7 @@ class TripController extends Controller
         $matchingRecords = $this->loadAndParseFTPData($finalFilteredPolyline);
         $currentTrip = Trip::where('id', $trip->id)->first();
         $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
+        
         if($vehicle_id){
 
             $findVehicle = Vehicle::select('id', 'mpg', 'fuel_left', 'reserve_fuel')
@@ -921,7 +926,7 @@ class TripController extends Controller
                 'trip' => $trip,
                 'fuel_stations' => $result,
 
-                'polyline_paths'=>$polylinePoints,
+                'polyline_paths'=>$decodePolylinePoints,
                 'stops' => $stops,
                 'vehicle' => $vehicle
             ];
@@ -996,30 +1001,30 @@ class TripController extends Controller
             $endLat = $trip->end_lat;
             $endLng = $trip->end_lng;
             $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
-        $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$startLat},{$startLng}&destination={$endLat},{$endLng}&key={$apiKey}";
-        $response = Http::get($url);
-        if ($response->successful()) {
-            $data = $response->json();
-            $route = $data['routes'][0];
+            $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$startLat},{$startLng}&destination={$endLat},{$endLng}&key={$apiKey}";
+            $response = Http::get($url);
+            if ($response->successful()) {
+                $data = $response->json();
+                $route = $data['routes'][0];
 
-            $distanceText = isset($route['legs'][0]['distance']['text']) ? $route['legs'][0]['distance']['text'] : null;
-            $durationText = isset($route['legs'][0]['duration']['text']) ? $route['legs'][0]['duration']['text'] : null;
+                $distanceText = isset($route['legs'][0]['distance']['text']) ? $route['legs'][0]['distance']['text'] : null;
+                $durationText = isset($route['legs'][0]['duration']['text']) ? $route['legs'][0]['duration']['text'] : null;
 
-            // Format distance (e.g., "100 miles")
-            if ($distanceText) {
-                $distanceParts = explode(' ', $distanceText);
-                $formattedDistance = $distanceParts[0] . ' miles'; // Ensuring it always returns distance in miles
+                // Format distance (e.g., "100 miles")
+                if ($distanceText) {
+                    $distanceParts = explode(' ', $distanceText);
+                    $formattedDistance = $distanceParts[0] . ' miles'; // Ensuring it always returns distance in miles
+                }
+
+                // Format duration (e.g., "2 hr 20 min")
+                if ($durationText) {
+                    $durationParts = explode(' ', $durationText);
+                    $hours = isset($durationParts[0]) ? $durationParts[0] : 0;
+                    $minutes = isset($durationParts[2]) ? $durationParts[2] : 0;
+                    $formattedDuration = $hours . ' hr ' . $minutes . ' min'; // Formatting as "2 hr 20 min"
+
+                }
             }
-
-            // Format duration (e.g., "2 hr 20 min")
-            if ($durationText) {
-                $durationParts = explode(' ', $durationText);
-                $hours = isset($durationParts[0]) ? $durationParts[0] : 0;
-                $minutes = isset($durationParts[2]) ? $durationParts[2] : 0;
-                $formattedDuration = $hours . ' hr ' . $minutes . ' min'; // Formatting as "2 hr 20 min"
-
-            }
-        }
             $trip->distance = $formattedDistance;
             $trip->duration = $formattedDuration;
             return response()->json(['status'=>200,'message'=>'trip found','data'=>$trip],200);
@@ -1151,12 +1156,16 @@ class TripController extends Controller
 
                     foreach ($data['routes'][0]['legs'] as $leg) {
                         foreach ($leg['steps'] as $step) {
-                            $polylinePoints[] = $step['polyline']['points'] ?? null;
+                            $polylinePoints[] = [
+                                'polyline' => $step['polyline']['points'],
+                                'instructions' => isset($step['html_instructions']) 
+                                    ? strip_tags($step['html_instructions']) 
+                                    : '',
+                            ];
                         }
                     }
 
-                    $polylinePoints = array_filter($polylinePoints);
-                   // $completePolyline = implode('', $polylinePoints);
+                    
                 }
                 $route = $data['routes'][0] ?? null;
                 if($route){
@@ -1387,12 +1396,15 @@ class TripController extends Controller
 
                     foreach ($data['routes'][0]['legs'] as $leg) {
                         foreach ($leg['steps'] as $step) {
-                            $polylinePoints[] = $step['polyline']['points'] ?? null;
+                            $polylinePoints[] = [
+                                'polyline' => $step['polyline']['points'],
+                                'instructions' => isset($step['html_instructions']) 
+                                    ? strip_tags($step['html_instructions']) 
+                                    : '',
+                            ];
                         }
                     }
 
-                    $polylinePoints = array_filter($polylinePoints);
-                   // $completePolyline = implode('', $polylinePoints);
                 }
                 $route = $data['routes'][0] ?? null;
                 if($route){
