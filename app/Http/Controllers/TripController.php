@@ -1214,6 +1214,9 @@ class TripController extends Controller
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
 
                     $findVehicle = Vehicle::where('id', $vehicle_id->vehicle_id)->first();
+                    if(!$findVehicle){
+                        return response()->json(['status'=>404,'message'=>'vehicle not found','data'=>[]],404);
+                    }
                     $truckMpg = $findVehicle->mpg;
                     $currentFuel = $findVehicle->fuel_left;
 
