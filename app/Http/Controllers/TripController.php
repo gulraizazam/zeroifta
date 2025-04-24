@@ -1212,11 +1212,11 @@ class TripController extends Controller
                     //$matchingRecords = $this->findMatchingRecords($finalFilteredPolyline, $ftpData);
                     $currentTrip = Trip::where('id', $trip->id)->first();
                     $vehicle_id = DriverVehicle::where('driver_id', $currentTrip->user_id)->first();
-
-                    $findVehicle = Vehicle::where('id', $vehicle_id->vehicle_id)->first();
-                    if(!$findVehicle){
+                    if(!$vehicle_id){
                         return response()->json(['status'=>404,'message'=>'vehicle not found','data'=>[]],404);
                     }
+                    $findVehicle = Vehicle::where('id', $vehicle_id->vehicle_id)->first();
+                    
                     $truckMpg = $findVehicle->mpg;
                     $currentFuel = $findVehicle->fuel_left;
 
