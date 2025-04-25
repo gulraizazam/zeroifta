@@ -812,7 +812,7 @@ class TripController extends Controller
         $updatedStartLng = $trip->updated_start_lng;
         $updatedEndLat =$trip->updated_end_lat;
         $updatedEndLng = $trip->updated_end_lng;
-        $decodePolylinePoints = json_decode($trip->polyline, true);
+        $decodePolylinePoints = json_decode($trip->polyline);
         $polylinePoints = array_column($decodePolylinePoints, 'polyline');
         
         $decodedCoordinates = [];
