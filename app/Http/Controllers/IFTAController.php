@@ -92,6 +92,9 @@ class IFTAController extends Controller
                                         'instructions' => isset($step['html_instructions']) 
                                             ? strip_tags($step['html_instructions']) 
                                             : '',
+                                        'maneuver' => $step['maneuver'] ?? "",
+                                        'duration' => $step['duration']['text'] ?? "",
+                                        'distance' => $step['distance']['text'] ?? "",
                                     ];
                                 }
                             }
@@ -357,6 +360,7 @@ class IFTAController extends Controller
         $response = Http::get($url);
         if ($response->successful()) {
             $data = $response->json();
+           
             if($data['routes'] && $data['routes'][0]){
                 if (!empty($data['routes'][0]['legs'][0]['steps'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
@@ -377,6 +381,9 @@ class IFTAController extends Controller
                             'instructions' => isset($step['html_instructions']) 
                                 ? strip_tags($step['html_instructions']) 
                                 : '',
+                            'maneuver' => $step['maneuver'] ?? "",
+                            'duration' => $step['duration']['text'] ?? "",
+                            'distance' => $step['distance']['text'] ?? "",
                         ];
                     }
 

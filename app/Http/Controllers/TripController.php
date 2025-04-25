@@ -158,6 +158,9 @@ class TripController extends Controller
                                     'instructions' => isset($step['html_instructions']) 
                                         ? strip_tags($step['html_instructions']) 
                                         : '',
+                                    'maneuver' => $step['maneuver'] ?? "",
+                                    'duration' => $step['duration']['text'] ?? "",
+                                    'distance' => $step['distance']['text'] ?? "",
                                 ];
                             }
                         }
@@ -1161,6 +1164,9 @@ class TripController extends Controller
                                 'instructions' => isset($step['html_instructions']) 
                                     ? strip_tags($step['html_instructions']) 
                                     : '',
+                                'maneuver' => $step['maneuver'] ?? "",
+                                'duration' => $step['duration']['text'] ?? "",
+                                'distance' => $step['distance']['text'] ?? "",
                             ];
                         }
                     }
@@ -1404,6 +1410,9 @@ class TripController extends Controller
                                 'instructions' => isset($step['html_instructions']) 
                                     ? strip_tags($step['html_instructions']) 
                                     : '',
+                                'maneuver' => $step['maneuver'] ?? "",
+                                'duration' => $step['duration']['text'] ?? "",
+                                'distance' => $step['distance']['text'] ?? "",
                             ];
                         }
                     }
