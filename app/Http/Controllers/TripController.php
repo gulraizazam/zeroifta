@@ -988,7 +988,7 @@ class TripController extends Controller
             // Attach full URL to each receipt image
             foreach ($trip->receipts as $receipt) {
                 $receipt->receipt_image = $receipt->receipt_image 
-                    ? url('public/receipts/' . $receipt->receipt_image) 
+                    ? url('receipts/' . $receipt->receipt_image) 
                     : null;
             }
     
