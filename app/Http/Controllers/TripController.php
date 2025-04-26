@@ -982,57 +982,19 @@ class TripController extends Controller
     }
     public function tripDetail(Request $request)
     {
-        $trip = Trip::where('id', $request->trip_id)->first();
-        if($trip){
-            $driverVehicle = DriverVehicle::where('driver_id', $trip->user_id)->pluck('vehicle_id')->first();
-            $vehicle = Vehicle::where('id', $driverVehicle)->first();
-
-            $pickupState = $this->getAddressFromCoordinates($trip->start_lat, $trip->start_lng);
-            $dropoffState = $this->getAddressFromCoordinates($trip->end_lat, $trip->end_lng);
-            $pickup = $this->getPickupFromCoordinates($trip->start_lat, $trip->start_lng);
-            $dropoff = $this->getPickupFromCoordinates($trip->end_lat, $trip->end_lng);
-            $trip->pickup = $pickup;
-            $trip->dropoff = $dropoff;
-            $trip->pickupState = $pickupState;
-            $trip->dropoffState = $dropoffState;
-            $trip->vehicle = $vehicle;
-            if($trip->vehicle && $trip->vehicle->vehicle_image){
-                $trip->vehicle->vehicle_image = url('/vehicles/' . $vehicle->vehicle_image);
+        $trip = Trip::with('receipts')->where('id', $request->trip_id)->first();
+    
+        if ($trip) {
+            // Attach full URL to each receipt image
+            foreach ($trip->receipts as $receipt) {
+                $receipt->receipt_image = $receipt->receipt_image 
+                    ? url('public/receipts/' . $receipt->receipt_image) 
+                    : null;
             }
-            $startLat = $trip->start_lat;
-            $startLng = $trip->start_lng;
-            $endLat = $trip->end_lat;
-            $endLng = $trip->end_lng;
-            $apiKey = 'AIzaSyA0HjmGzP9rrqNBbpH7B0zwN9Gx9MC4w8w';
-            $url = "https://maps.googleapis.com/maps/api/directions/json?origin={$startLat},{$startLng}&destination={$endLat},{$endLng}&key={$apiKey}";
-            $response = Http::get($url);
-            if ($response->successful()) {
-                $data = $response->json();
-                $route = $data['routes'][0];
-
-                $distanceText = isset($route['legs'][0]['distance']['text']) ? $route['legs'][0]['distance']['text'] : null;
-                $durationText = isset($route['legs'][0]['duration']['text']) ? $route['legs'][0]['duration']['text'] : null;
-
-                // Format distance (e.g., "100 miles")
-                if ($distanceText) {
-                    $distanceParts = explode(' ', $distanceText);
-                    $formattedDistance = $distanceParts[0] . ' miles'; // Ensuring it always returns distance in miles
-                }
-
-                // Format duration (e.g., "2 hr 20 min")
-                if ($durationText) {
-                    $durationParts = explode(' ', $durationText);
-                    $hours = isset($durationParts[0]) ? $durationParts[0] : 0;
-                    $minutes = isset($durationParts[2]) ? $durationParts[2] : 0;
-                    $formattedDuration = $hours . ' hr ' . $minutes . ' min'; // Formatting as "2 hr 20 min"
-
-                }
-            }
-            $trip->distance = $formattedDistance;
-            $trip->duration = $formattedDuration;
-            return response()->json(['status'=>200,'message'=>'trip found','data'=>$trip],200);
-        }else{
-            return response()->json(['status'=>404,'message'=>'trip not found','data'=>(object)[]],404);
+    
+            return response()->json(['status' => 200, 'message' => 'trip found', 'data' => $trip], 200);
+        } else {
+            return response()->json(['status' => 404, 'message' => 'trip not found', 'data' => (object)[]], 404);
         }
     }
 

@@ -28,4 +28,8 @@ class Trip extends Model
     {
         return $this->hasMany(Tripstop::class);
     }
+    public function receipts()
+    {
+        return $this->hasMany(Receipt::class);
+    }
 }
