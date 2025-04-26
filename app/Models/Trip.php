@@ -32,4 +32,9 @@ class Trip extends Model
     {
         return $this->hasMany(Receipt::class);
     }
+    public function vehicle()
+    {
+        return $this->hasOne(Vehicle::class);
+        // Or use 'driver_id' if that is the foreign key that relates the Trip to DriverVehicle.
+    }
 }

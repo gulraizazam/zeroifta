@@ -982,7 +982,7 @@ class TripController extends Controller
     }
     public function tripDetail(Request $request)
     {
-        $trip = Trip::with('receipts')->where('id', $request->trip_id)->first();
+        $trip = Trip::with(['receipts','vehicle'])->where('id', $request->trip_id)->first();
     
         if ($trip) {
             // Attach full URL to each receipt image
@@ -991,7 +991,9 @@ class TripController extends Controller
                     ? url('receipts/' . $receipt->receipt_image) 
                     : null;
             }
-    
+            if($trip->vehicle && $trip->vehicle->vehicle_image != null){
+                $trip->vehicle->vehicle_image = url('/vehicles/' . $trip->vehicle->vehicle_image);
+            }
             return response()->json(['status' => 200, 'message' => 'trip found', 'data' => $trip], 200);
         } else {
             return response()->json(['status' => 404, 'message' => 'trip not found', 'data' => (object)[]], 404);
