@@ -196,6 +196,12 @@ return [
     "License Plate No."=>"License Plate No.",
     "Current Password"=>"Current Password",
     "New Password"=>"New Password",
+    "Fuel Station Name"=>"Fuel Station Name",
+    "Price Per Gallon"=>"Price Per Gallon",
+    "Gallons Bought"=>"Gallons Bought",
+    "Receipt Image"=>"Receipt Image",
+    "Manage Receipts"=>"Manage Receipts",
+    "Receipts"=>"Receipts",
 
 
 

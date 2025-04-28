@@ -11,6 +11,7 @@ use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Company\DriversController;
 use App\Http\Controllers\Company\DriverVehiclesController;
 use App\Http\Controllers\Company\VehiclesController;
+use App\Http\Controllers\CompanyReceiptController;
 use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\NewPasswordController;
 use App\Http\Controllers\PasswordResetLinkController;
@@ -228,6 +229,18 @@ Route::middleware('auth')->group(function () {
         Route::get('drivers/track/{id}', [DriversController::class, 'track'])->name('driver.track');
         Route::get('/drivers/import', [DriversController::class, 'importForm'])->name('drivers.importform');
         Route::post('/drivers/import', [DriversController::class, 'import'])->name('drivers.import');
+
+        /////receipts
+        Route::get('receipts', [CompanyReceiptController::class, 'index'])->name('receipts');
+        Route::get('drivers/create', [DriversController::class, 'create'])->name('drivers.create');
+        Route::post('drivers/store', [DriversController::class, 'store'])->name('driver.store');
+        Route::get('drivers/edit/{id}', [DriversController::class, 'edit'])->name('driver.edit');
+        Route::post('drivers/update/{id}', [DriversController::class, 'update'])->name('driver.update');
+        Route::get('drivers/delete/{id}', [DriversController::class, 'delete'])->name('driver.delete');
+        Route::get('drivers/track/{id}', [DriversController::class, 'track'])->name('driver.track');
+        Route::get('/drivers/import', [DriversController::class, 'importForm'])->name('drivers.importform');
+        Route::post('/drivers/import', [DriversController::class, 'import'])->name('drivers.import');
+        ////
 
         Route::get('fleet', [CompanyController::class, 'fleet'])->name('fleet');
         Route::get('subscribe', [CompanyController::class, 'showPlans'])->name('subscribe');

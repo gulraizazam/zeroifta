@@ -186,4 +186,11 @@ return [
     "License Plate No."=>"Número de matrícula.",
     "Current Password"=>"Contraseña actual",
     "New Password"=>"Nueva contraseña",
+    "Fuel Station Name"=>"Estacion de combustible",
+    "Price Per Gallon"=>"Precio por galón",
+    "Gallons Bought"=>"Galones comprados",
+    "Receipt Image"=>"Imagen de recibo",
+    "Receipts"=>"Recibos",
+    "Manage Receipts"=>"Administrar recibos",
+
 ];
