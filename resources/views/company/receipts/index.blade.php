@@ -19,19 +19,7 @@
   @endif
   <div class="manage-comp mb-4">
     <div class="Filters-main mb-3 mb-md-4">
-      <div class="sec1-style">
-        <div class="tabele_filter">
-          <div class="tabFilt_left">
-            <!-- Show Filter -->
-           
-            <!-- Sort By Filter -->
-          
-          </div>
-          <div class="filter-btn">
-           
-          </div>
-        </div>
-      </div>
+     
     </div>
 
     <div class="sec1-style">
