@@ -54,7 +54,7 @@
               <td class="table-text-left">{{$receipt->gallons_bought}}</td>
               <td class="table-text-left">
                 
-                <img src="{{asset('receipts')}}/{{$receipt->receipt_image}}" class="avatar avatar-sm me-3" alt="user1" style="height: 30px;">
+                <img src="{{asset('receipts')}}/{{$receipt->receipt_image}}" class="avatar avatar-sm me-3" alt="user1" style="height: 130px;">
               </td>
              
               
