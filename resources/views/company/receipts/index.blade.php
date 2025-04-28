@@ -23,13 +23,9 @@
         <div class="tabele_filter">
           <div class="tabFilt_left">
             <!-- Show Filter -->
-            <div class="sd-filter">
-
-            </div>
+           
             <!-- Sort By Filter -->
-            <div class="sd2-filter">
-
-            </div>
+          
           </div>
           <div class="filter-btn">
            
