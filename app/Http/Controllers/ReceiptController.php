@@ -36,11 +36,11 @@ class ReceiptController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'trip_id'=>'required|exists:trips,id',
-            'driver_id'=>'required|exists:users,id',
-            'fuel_station_name' => 'required',
-            'price_per_gallon' => 'required',
-            'gallons_bought' => 'required',
+            'trip_id'=>'nullable|exists:trips,id',
+            'driver_id'=>'nullable|exists:users,id',
+            // 'fuel_station_name' => 'required',
+            // 'price_per_gallon' => 'required',
+            // 'gallons_bought' => 'required',
             //'location' => 'required',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240', // max 10MB
         ]);
