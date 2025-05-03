@@ -70,7 +70,7 @@ class IFTAController extends Controller
                 if (!empty($data['routes'][0]['legs'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                    $stepSize =150; // Sample every 10th point
+                    $stepSize =3; // Sample every 10th point
 
                     foreach ($steps as $step) {
                         if (isset($step['polyline']['points'])) {
@@ -202,7 +202,11 @@ class IFTAController extends Controller
                                 'discount' => $value['discount'],
                                 'ifta_tax' => $value['IFTA_tax'],
                                 'is_optimal' => $value['isOptimal'] ?? false,
+                                'firstOptimal' => $value['firstOptimal'] ?? false,
+                                'midOptimal' => $value['midOptimal'] ?? false,
+                                'secondOptimal' => $value['secondOptimal'] ?? false,
                                 'address' => $value['address'],
+                                'distanceFromStart' => $value['distanceFromStart'],
                                 'gallons_to_buy' => $value['gallons_to_buy'],
                                 'trip_id' => $trip->id,
                                 'user_id' => $trip->user_id,
@@ -317,7 +321,7 @@ class IFTAController extends Controller
     public function getDecodedPolyline(Request $request, FcmService $firebaseService)
     {
         // Increase execution time to handle long requests
-        ini_set('max_execution_time', 600);
+        ini_set('max_execution_time', 300);
         ///validating all data///
         $validatedData =$request->validate([
             'user_id'   => 'required|exists:users,id',
@@ -365,7 +369,7 @@ class IFTAController extends Controller
                 if (!empty($data['routes'][0]['legs'][0]['steps'])) {
                     $steps = $data['routes'][0]['legs'][0]['steps'];
                     $decodedCoordinates = [];
-                    $stepSize = 150; // Sample every 10th point ...but this approach is not correct
+                    $stepSize =3; // Sample every 10th point ...but this approach is not correct
 
                     foreach ($steps as $step) {
                         if (isset($step['polyline']['points'])) {
@@ -502,7 +506,11 @@ class IFTAController extends Controller
                                 'discount' => $value['discount'],
                                 'ifta_tax' => $value['IFTA_tax'],
                                 'is_optimal' => $value['isOptimal'] ?? false,
+                                'firstOptimal' => $value['firstOptimal'] ?? false,
+                            'midOptimal' => $value['midOptimal'] ?? false,
+                            'secondOptimal' => $value['secondOptimal'] ?? false,
                                 'address' => $value['address'] ?? 'N/A',
+                                'distanceFromStart' => $value['distanceFromStart'],
                                 'gallons_to_buy' => $value['gallons_to_buy'] ?? 0,
                                 'trip_id' => $trip->id,
                                 'user_id' => $validatedData['user_id'],

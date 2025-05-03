@@ -1949,3 +1949,90 @@ button.page-link {
     margin: 0 auto;
     overflow: hidden;
 }
+
+/* Add these styles */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.table-responsive {
+    margin: 0;
+}
+
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+.btn-group {
+    gap: 0.25rem;
+}
+
+.btn-outline-primary {
+    color: #0c388b;
+    border-color: #0c388b;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0c388b;
+    color: #fff;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: #0c388b;
+    border-color: #0c388b;
+}
+
+/* Dark mode support */
+.dark-mode .card {
+    background-color: #2d3748;
+    border-color: #4a5568;
+}
+
+.dark-mode .table {
+    color: #e2e8f0;
+}
+
+.dark-mode .badge.bg-light {
+    background-color: #4a5568 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Add these styles to your existing switch styles */
+.form-switch .form-check-input {
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: #0c388b;
+    border-color: #0c388b;
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(12, 56, 139, 0.25);
+}
+
+/* Dark mode support */
+.dark-mode .form-switch .form-check-input:checked {
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+
+.dark-mode .form-switch .form-check-input:not(:checked) {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}

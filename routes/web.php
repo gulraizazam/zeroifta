@@ -78,13 +78,36 @@ Route::get('/test-divide-zero', function () {
 });
 
 Route::get('/testftp', [AdminController::class, 'testftp']);
+Route::get('/test-log', function () {
+  logger()->info("Testing CloudWatch log at " . now());
+
+  // Force a division by zero
+  try {
+      $x = 5 / 0;
+  } catch (\Throwable $e) {
+      logger()->error('Division by zero: ' . $e->getMessage());
+  }
+
+  return 'Logged to CloudWatch (check CloudWatch console)';
+});
 Route::get('/get-fcm-token', function () {
     $token = DB::table('fcm_tokens')->where('user_id', auth()->id())->value('token');
     return response()->json(['fcm_token' => $token]);
 });
-Route::get('/test-log', function () {
-    Log::channel('cloudwatch')->info('This is a test log from Laravel.');
-    return "Log sent to CloudWatch!";
+Route::get('/test-cloudwatch-log', function () {
+  try {
+      // This will throw a DivisionByZeroError
+      $result = 100 / 0;
+  } catch (\Throwable $e) {
+      Log::channel('cloudwatch')->error('Division by zero error', [
+          'message' => $e->getMessage(),
+          'file' => $e->getFile(),
+          'line' => $e->getLine(),
+          'trace' => $e->getTraceAsString(),
+      ]);
+
+      return response()->json(['error' => 'Something went wrong. Check logs.']);
+  }
 });
 Route::post('/store-fcm-token', function (Request $request) {
     $request->validate(['fcm_token' => 'required|string']);
@@ -164,61 +187,85 @@ Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.updatepas');
 Route::middleware('auth')->group(function () {
-  Route::group(
-    [
-       'prefix' => LaravelLocalization::setLocale(),
-      'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
-    ],
-    function () {
-      Route::get('/', [AdminController::class, 'index'])->name('dashboard')->middleware('auth');
-      Route::get('/get-theme', [ThemeController::class, 'getTheme']);
-      Route::post('/update-theme', [ThemeController::class, 'update'])->name('user.theme.update');
-      Route::get('profile', [UsersController::class, 'profile'])->name('profile');
-      Route::post('profile/update', [UsersController::class, 'profileUpdate'])->name('profile.update');
-      Route::get('password/change', [UsersController::class, 'changePasswordUpdate'])->name('password.change');
-      Route::post('password/change', [UsersController::class, 'passwordUpdate'])->name('passwords.updatePass');
-      Route::get('logout', [AdminController::class, 'logout'])->name('logout');
-      Route::get('companies', [CompaniesController::class, 'index'])->name('companies');
-      Route::get('companies/edit/{id}', [CompaniesController::class, 'edit'])->name('companies.edit');
-      Route::post('companies/update/{id}', [CompaniesController::class, 'update'])->name('companies.update');
-      Route::get('companies/delete/{id}', [CompaniesController::class, 'delete'])->name('companies.delete');
-      Route::post('companies/change-password/{id}', [CompaniesController::class, 'changePassword'])->name('companies.changePassword');
-      Route::get('plans', [PlansController::class, 'index'])->name('plans');
-      Route::get('plans/create', [PlansController::class, 'create'])->name('plans.create');
-      Route::post('plans/store', [PlansController::class, 'store'])->name('plans.store');
-      Route::get('plans/edit/{id}', [PlansController::class, 'edit'])->name('plans.edit');
-      Route::post('plans/update/{id}', [PlansController::class, 'update'])->name('plans.update');
-      Route::get('plans/delete/{id}', [PlansController::class, 'delete'])->name('plans.delete');
-      Route::get('fuel_taxes', [FuelTaxController::class, 'index'])->name('fuel_taxes');
-      Route::get('fuel_taxes/create', [FuelTaxController::class, 'create'])->name('fuel_taxes.create');
-      Route::post('fuel_taxes/store', [FuelTaxController::class, 'store'])->name('fuel_taxes.store');
-      Route::get('fuel_taxes/edit/{id}', [FuelTaxController::class, 'edit'])->name('fuel_taxes.edit');
-      Route::post('fuel_taxes/update/{id}', [FuelTaxController::class, 'update'])->name('fuel_taxes.update');
-      Route::get('fuel_taxes/delete/{id}', [FuelTaxController::class, 'delete'])->name('fuel_taxes.delete');
-      Route::get('contactus/all', [AdminController::class, 'contactUsForms'])->name('admin.contactus');
-      Route::get('contactform/read/{id}', [AdminController::class, 'readForm'])->name('contactform.detail');
-      Route::get('contactform/delete/{id}', [AdminController::class, 'deleteForm'])->name('contactform.delete');
-      ////
-      Route::group(['middleware' => ['check.subscription']], function () {
-        Route::get('vehicles/all', [VehiclesController::class, 'index'])->name('allvehicles');
-        Route::get('vehicles/create', [VehiclesController::class, 'create'])->name('vehicles.create');
-        Route::post('vehicles/store', [VehiclesController::class, 'store'])->name('vehicle.store');
-        Route::get('vehicles/edit/{id}', [VehiclesController::class, 'edit'])->name('vehicle.edit');
-        Route::post('vehicles/update/{id}', [VehiclesController::class, 'update'])->name('vehicle.update');
-        Route::get('vehicles/delete/{id}', [VehiclesController::class, 'delete'])->name('vehicle.delete');
-        Route::get('/vehicles/import', [VehiclesController::class, 'importForm'])->name('vehicles.importform');
-        Route::post('/vehicles/import', [VehiclesController::class, 'import'])->name('vehicle.import');
-        Route::post('/vehicles/check-vin', [VehiclesController::class, 'checkVin'])->name('vehicle.checkVin');
-        Route::get('/driver/vehicles', [DriverVehiclesController::class, 'index'])->name('driver_vehicles');
-        Route::get('driver/vehicles/add', [DriverVehiclesController::class, 'create'])->name('driver_vehicles.add');
-        Route::post('driver/vehicles/store', [DriverVehiclesController::class, 'store'])->name('driver_vehicles.store');
-        Route::post('driver/vehicles/reassign', [DriverVehiclesController::class, 'reassign'])->name('driver_vehicles.reassign');
-        Route::get('driver/vehicles/edit/{id}', [DriverVehiclesController::class, 'edit'])->name('driver_vehicles.edit');
-        Route::post('driver/vehicles/update/{id}', [DriverVehiclesController::class, 'update'])->name('driver_vehicles.update');
-        Route::get('driver/vehicles/delete/{id}', [DriverVehiclesController::class, 'destroy'])->name('driver_vehicles.delete');
-        Route::post('/driver-vehicles/check-driver-assignment', [DriverVehiclesController::class, 'checkDriverAssignment'])->name('driver_vehicles.check_driver_assignment');
-        Route::post('/driver-vehicles/check-vehicle-assignment', [DriverVehiclesController::class, 'checkVehicleAssignment'])->name('driver_vehicles.check_vehicle_assignment');
-        Route::post('/driver-vehicles/check-vehicle-already-assignment', [DriverVehiclesController::class, 'checkVehicleAlreadyAssignment'])->name('driver_vehicles.check_vehicle_already_assignment');
+  Route::group([
+    'prefix' => LaravelLocalization::setLocale(),
+    'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
+  ], function () {
+    Route::get('/', [AdminController::class, 'index'])->name('dashboard')->middleware('auth');
+    Route::get('/get-theme', [ThemeController::class, 'getTheme']);
+    Route::post('/update-theme', [ThemeController::class, 'update'])->name('user.theme.update');
+    Route::get('profile', [UsersController::class, 'profile'])->name('profile');
+    Route::post('profile/update', [UsersController::class, 'profileUpdate'])->name('profile.update');
+    Route::get('password/change', [UsersController::class, 'changePasswordUpdate'])->name('password.change');
+    Route::post('password/change', [UsersController::class, 'passwordUpdate'])->name('passwords.updatePass');
+    Route::get('logout', [AdminController::class, 'logout'])->name('logout');
+    Route::get('companies', [CompaniesController::class, 'index'])->name('companies');
+    Route::get('companies/edit/{id}', [CompaniesController::class, 'edit'])->name('companies.edit');
+    Route::post('companies/update/{id}', [CompaniesController::class, 'update'])->name('companies.update');
+    Route::get('companies/delete/{id}', [CompaniesController::class, 'delete'])->name('companies.delete');
+    Route::post('companies/change-password/{id}', [CompaniesController::class, 'changePassword'])->name('companies.changePassword');
+    Route::get('plans', [PlansController::class, 'index'])->name('plans');
+    Route::get('plans/create', [PlansController::class, 'create'])->name('plans.create');
+    Route::post('plans/store', [PlansController::class, 'store'])->name('plans.store');
+    Route::get('plans/edit/{id}', [PlansController::class, 'edit'])->name('plans.edit');
+    Route::post('plans/update/{id}', [PlansController::class, 'update'])->name('plans.update');
+    Route::get('plans/{id}/check-payments', [PlansController::class, 'checkPayments'])->name('plans.check-payments');
+    Route::delete('plans/{id}', [PlansController::class, 'delete'])->name('plans.delete');
+    Route::post('plans/{id}/toggle-status', [PlansController::class, 'toggleStatus'])->name('plans.toggle-status');
+    Route::post('plans/{id}/toggle-featured', [PlansController::class, 'toggleFeatured'])->name('plans.toggle-featured');
+    Route::post('/plans/update-order', [PlansController::class, 'updateOrder'])->name('plans.update-order');
+    Route::get('fuel_taxes', [FuelTaxController::class, 'index'])->name('fuel_taxes');
+    Route::get('fuel_taxes/create', [FuelTaxController::class, 'create'])->name('fuel_taxes.create');
+    Route::post('fuel_taxes/store', [FuelTaxController::class, 'store'])->name('fuel_taxes.store');
+    Route::get('fuel_taxes/edit/{id}', [FuelTaxController::class, 'edit'])->name('fuel_taxes.edit');
+    Route::post('fuel_taxes/update/{id}', [FuelTaxController::class, 'update'])->name('fuel_taxes.update');
+    Route::get('fuel_taxes/delete/{id}', [FuelTaxController::class, 'delete'])->name('fuel_taxes.delete');
+    Route::get('contactus/all', [AdminController::class, 'contactUsForms'])->name('admin.contactus');
+    Route::get('contactform/read/{id}', [AdminController::class, 'readForm'])->name('contactform.detail');
+    Route::get('contactform/delete/{id}', [AdminController::class, 'deleteForm'])->name('contactform.delete');
+
+    Route::middleware(['auth'])->group(function () {
+        Route::middleware('check.plan.feature:vehicles.all')->group(function () {
+            Route::get('vehicles/all', [VehiclesController::class, 'index'])->name('allvehicles');
+        });
+
+        Route::middleware('check.plan.feature:vehicles.create')->group(function () {
+            Route::get('vehicles/create', [VehiclesController::class, 'create'])->name('vehicles.create');
+            Route::post('vehicles/store', [VehiclesController::class, 'store'])->name('vehicle.store');
+        });
+
+        Route::middleware('check.plan.feature:vehicles.edit')->group(function () {
+            Route::get('vehicles/edit/{id}', [VehiclesController::class, 'edit'])->name('vehicle.edit');
+            Route::post('vehicles/update/{id}', [VehiclesController::class, 'update'])->name('vehicle.update');
+        });
+
+        Route::middleware('check.plan.feature:vehicles.delete')->group(function () {
+            Route::get('vehicles/delete/{id}', [VehiclesController::class, 'delete'])->name('vehicle.delete');
+        });
+
+        Route::middleware('check.plan.feature:vehicles.import')->group(function () {
+            Route::get('/vehicles/import', [VehiclesController::class, 'importForm'])->name('vehicles.importform');
+            Route::post('/vehicles/import', [VehiclesController::class, 'import'])->name('vehicle.import');
+        });
+
+        Route::middleware('check.plan.feature:driver_vehicles.index')->group(function () {
+            Route::get('/driver/vehicles', [DriverVehiclesController::class, 'index'])->name('driver_vehicles');
+        });
+
+        Route::middleware('check.plan.feature:driver_vehicles.create')->group(function () {
+            Route::get('driver/vehicles/add', [DriverVehiclesController::class, 'create'])->name('driver_vehicles.add');
+            Route::post('driver/vehicles/store', [DriverVehiclesController::class, 'store'])->name('driver_vehicles.store');
+            Route::post('driver/vehicles/reassign', [DriverVehiclesController::class, 'reassign'])->name('driver_vehicles.reassign');
+        });
+
+        Route::middleware('check.plan.feature:driver_vehicles.edit')->group(function () {
+            Route::get('driver/vehicles/edit/{id}', [DriverVehiclesController::class, 'edit'])->name('driver_vehicles.edit');
+            Route::post('driver/vehicles/update/{id}', [DriverVehiclesController::class, 'update'])->name('driver_vehicles.update');
+        });
+
+        Route::middleware('check.plan.feature:driver_vehicles.delete')->group(function () {
+            Route::get('driver/vehicles/delete/{id}', [DriverVehiclesController::class, 'destroy'])->name('driver_vehicles.delete');
+        });
 
         Route::get('drivers/all', [DriversController::class, 'index'])->name('drivers.all');
         Route::get('drivers/create', [DriversController::class, 'create'])->name('drivers.create');
@@ -242,24 +289,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/drivers/import', [DriversController::class, 'import'])->name('drivers.import');
         ////
 
-        Route::get('fleet', [CompanyController::class, 'fleet'])->name('fleet');
-        Route::get('subscribe', [CompanyController::class, 'showPlans'])->name('subscribe');
+        Route::middleware('check.plan.feature:fleet.view')->group(function () {
+            Route::get('fleet', [CompanyController::class, 'fleet'])->name('fleet');
+        });
 
-        ////
+        Route::get('subscription', [SubscriptionController::class, 'index'])->name('subscription');
+    });
 
-      });
-      Route::get('payment-methods', [PaymentMethodsController::class, 'index'])->name('payment-methods.all');
-      Route::get('/add-payment-method', [PaymentMethodsController::class, 'addPaymentMethod'])->name('payment_method.add');
-      Route::post('/store-payment-method', [PaymentMethodsController::class, 'storePaymentMethod'])->name('store-payment-method');
-      Route::get('/set-default-payment-method/{id}', [PaymentMethodsController::class, 'setDefaultPaymentMethod'])->name('make_default');
-      Route::get('payments', [PaymentController::class, 'allPayments'])->name('payments');
-      Route::get('company/contactus/all', [CompanyController::class, 'contactUsForms'])->name('company.contactus');
-      Route::get('company/contactform/read/{id}', [CompanyController::class, 'readForm'])->name('company.contactform.detail');
-    }
-  );
+    Route::get('payment-methods', [PaymentMethodsController::class, 'index'])->name('payment-methods.all');
+    Route::get('/add-payment-method', [PaymentMethodsController::class, 'addPaymentMethod'])->name('payment_method.add');
+    Route::post('/store-payment-method', [PaymentMethodsController::class, 'storePaymentMethod'])->name('store-payment-method');
+    Route::get('/set-default-payment-method/{id}', [PaymentMethodsController::class, 'setDefaultPaymentMethod'])->name('make_default');
+    Route::get('payments', [PaymentController::class, 'allPayments'])->name('payments');
+    Route::get('company/contactus/all', [CompanyController::class, 'contactUsForms'])->name('company.contactus');
+    Route::get('company/contactform/read/{id}', [CompanyController::class, 'readForm'])->name('company.contactform.detail');
+  });
   Route::get('contactus', [CompanyController::class, 'contactus'])->name('contactus');
   Route::post('contactus', [CompanyController::class, 'submitContactUs'])->name('company.contactus.submit');
-  ////
 
 
   Route::get('/checkout', [PaymentController::class, 'showCheckoutForm'])->name('checkout.form');
@@ -275,8 +321,14 @@ Route::middleware('auth')->group(function () {
 
   Route::post('/messages', [ContactUsController::class, 'store'])->name('messages.store');
   Route::get('/messages/{contact_id}', [ContactUsController::class, 'fetchMessages'])->name('messages.fetch');
-  //Route::post('/messages/read/{id}', [ContactUsController::class, 'markAsRead'])->name('messages.markAsRead');
 
 
   Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
 });
+
+// Subscription routes
+Route::get('/subscription/success', function () {
+    return view('subscription.success');
+})->name('subscription.success');
+
+Route::get('/subscription/manage', [SubscriptionController::class, 'manage'])->name('subscription.manage');

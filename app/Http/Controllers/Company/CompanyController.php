@@ -45,7 +45,7 @@ class CompanyController extends Controller
             );
         }
         Auth::loginUsingId($company->id);
-        return redirect('subscription');
+        return redirect()->route('subscription');
         //return redirect('login')->withSuccess('Account created successfully. Now you can login.');
 
     }
@@ -75,9 +75,28 @@ class CompanyController extends Controller
     }
     public function showPlans()
     {
-        $plans = Plan::get();
-        $userPlan = Subscription::with('planName')->where('user_id',Auth::id())->where('status','active')->first();
-        return view('company.plans',get_defined_vars());
+        $plans = Plan::where('is_active', true)->orderBy('price')->get();
+        
+        $availableFeatures = [
+            'vehicles.all' => 'View All Vehicles',
+            'vehicles.create' => 'Create Vehicle',
+            'vehicles.edit' => 'Edit Vehicle',
+            'vehicles.delete' => 'Delete Vehicle',
+            'vehicles.import' => 'Import Vehicles',
+            'driver_vehicles.index' => 'View Driver Vehicles',
+            'driver_vehicles.create' => 'Assign Vehicles to Drivers',
+            'driver_vehicles.edit' => 'Edit Driver Vehicle Assignment',
+            'driver_vehicles.delete' => 'Remove Driver Vehicle Assignment',
+            'drivers.all' => 'View All Drivers',
+            'drivers.create' => 'Create Driver',
+            'drivers.edit' => 'Edit Driver',
+            'drivers.delete' => 'Delete Driver',
+            'drivers.import' => 'Import Drivers',
+            'drivers.track' => 'Track Drivers',
+            'fleet.view' => 'View Fleet Management',
+        ];
+
+        return view('subscription', compact('plans', 'availableFeatures'));
     }
     public function contactUsForms()
     {

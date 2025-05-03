@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,5 +21,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         set_time_limit(300);
+
+        Blade::if('hasFeature', function ($feature) {
+            return auth()->check() && auth()->user()->hasFeature($feature);
+        });
     }
 }
